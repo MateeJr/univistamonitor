@@ -330,7 +330,7 @@ export default function AkunPage() {
     );
 
 const AdminList: React.FC = () => (
-  <div className="rounded-2xl border border-[#1f1f1f] bg-[#0a0a0a] p-5 shadow-[0_8px_24px_rgba(0,0,0,0.45)] md:h-full md:min-h-0 flex flex-col">
+  <div className="rounded-2xl border border-[#1f1f1f] bg-[#0a0a0a] p-5 ring-1 ring-red-500/30 shadow-[0_0_24px_rgba(239,68,68,0.25),0_8px_24px_rgba(0,0,0,0.45)] md:h-full md:min-h-0 flex flex-col">
     <PanelHeader title="List Akun Admin" onRefresh={loadLists} count={adminAccounts.length} />
     <div className="mt-3 h-px w-full bg-[#1f1f1f]" />
     <div className="mt-3 md:flex-1 md:overflow-auto">
@@ -382,7 +382,7 @@ const AdminList: React.FC = () => (
 );
 
 const UserList: React.FC = () => (
-  <div className="rounded-2xl border border-[#1f1f1f] bg-[#0a0a0a] p-5 shadow-[0_8px_24px_rgba(0,0,0,0.45)] md:h-full md:min-h-0 flex flex-col">
+  <div className="rounded-2xl border border-[#1f1f1f] bg-[#0a0a0a] p-5 ring-1 ring-red-500/30 shadow-[0_0_24px_rgba(239,68,68,0.25),0_8px_24px_rgba(0,0,0,0.45)] md:h-full md:min-h-0 flex flex-col">
     <PanelHeader title="List Akun User" onRefresh={loadLists} count={userAccounts.length} />
     <div className="mt-3 h-px w-full bg-[#1f1f1f]" />
     <div className="mt-3 md:flex-1 md:overflow-auto">
@@ -437,7 +437,7 @@ return (
     <div className="mx-auto w-full max-w-6xl md:h-full md:min-h-0 grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
       <div className="md:col-span-1 flex items-start justify-center md:h-full md:min-h-0">
         {!profile ? (
-          <div className="w-full max-w-[420px] rounded-2xl border border-[#1f1f1f] bg-[#0a0a0a] p-5 shadow-[0_8px_24px_rgba(0,0,0,0.45)]">
+          <div className="w-full max-w-[420px] rounded-2xl border border-[#1f1f1f] bg-[#0a0a0a] p-5 ring-1 ring-red-500/30 shadow-[0_0_24px_rgba(239,68,68,0.25),0_8px_24px_rgba(0,0,0,0.45)]">
             <h1 className="text-[22px] font-bold text-[#fafafa]">Masuk</h1>
             <p className="mt-1.5 text-[13px] text-[#a1a1aa]">
               Univista Monitoring ~ Masuk untuk melanjutkan.
@@ -504,7 +504,7 @@ return (
             </button>
           </div>
         ) : (
-          <div className="w-full max-w-[420px] rounded-2xl border border-[#1f1f1f] bg-[#0a0a0a] p-5 shadow-[0_8px_24px_rgba(0,0,0,0.45)]">
+          <div className="w-full max-w-[420px] rounded-2xl border border-[#1f1f1f] bg-[#0a0a0a] p-5 ring-1 ring-red-500/30 shadow-[0_0_24px_rgba(239,68,68,0.25),0_8px_24px_rgba(0,0,0,0.45)]">
             <h1 className="text-[22px] font-bold text-[#fafafa]">Profil</h1>
             <div className="my-3 h-px w-full bg-[#1f1f1f]" />
             <div className="flex items-center justify-between py-2">
