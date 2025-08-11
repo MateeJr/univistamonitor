@@ -146,16 +146,24 @@ export default function AkunPage() {
     const currentClientId = clientIdRef.current || getClientId();
     const filtered = adminAccounts.filter((it) => (!onlineOnly || it.online) && (!q || it.adminName?.toLowerCase().includes(q) || it.name?.toLowerCase().includes(q)));
     
-    // Sort to put current user's account at the top
+    // Sort to put current user's account at the top, then by online status, then by recent activity
     return filtered.sort((a, b) => {
-      const aIsCurrent = a.clientId === currentClientId;
-      const bIsCurrent = b.clientId === currentClientId;
+      const aIsCurrent = a.clientId === currentClientId && a.name === profile?.loginId && a.adminName === profile?.adminName;
+      const bIsCurrent = b.clientId === currentClientId && b.name === profile?.loginId && b.adminName === profile?.adminName;
       
+      // Priority 1: Current user's account always at top
       if (aIsCurrent && !bIsCurrent) return -1;
       if (!aIsCurrent && bIsCurrent) return 1;
-      return 0; // Keep original order for other accounts
+      
+      // Priority 2: Online accounts before offline
+      if (a.online !== b.online) return b.online ? 1 : -1;
+      
+      // Priority 3: Most recently signed in
+      const aTime = new Date(a.signedInAt || 0).getTime();
+      const bTime = new Date(b.signedInAt || 0).getTime();
+      return bTime - aTime;
     });
-  }, [adminAccounts, onlineOnly, search]);
+  }, [adminAccounts, onlineOnly, search, profile]);
   const filteredUserAccounts = useMemo(() => {
     const q = search.trim().toLowerCase();
     return userAccounts.filter((it) => (!onlineOnly || it.online) && (!q || it.name?.toLowerCase().includes(q)));
@@ -317,7 +325,7 @@ export default function AkunPage() {
       await fetch(ENDPOINTS.logout, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: profile.loginId, status: "logout", clientId: clientIdRef.current || getClientId() }),
+        body: JSON.stringify({ name: profile.loginId, adminName: profile.adminName, status: "logout", clientId: clientIdRef.current || getClientId() }),
       });
     } catch {}
     try { localStorage.removeItem(STORAGE_KEY); } catch {}
@@ -429,7 +437,7 @@ const AdminList: React.FC = () => {
     <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm p-4 h-full flex flex-col">
       <PanelHeader title="Akun Admin" onRefresh={loadLists} count={filteredAdminAccounts.length} />
       <div className="mt-3 h-px w-full bg-zinc-800/50" />
-      <div className="mt-4 flex-1 overflow-auto" aria-live="polite" aria-busy={listsLoading}>
+      <div className="mt-4 overflow-y-auto max-h-80 md:max-h-96" aria-live="polite" aria-busy={listsLoading}>
         {listsError ? (
           <p className="text-sm text-rose-400">{listsError}</p>
         ) : (
@@ -513,7 +521,7 @@ const UserList: React.FC = () => (
   <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm p-4 h-full flex flex-col">
     <PanelHeader title="Akun Pengguna" onRefresh={loadLists} count={filteredUserAccounts.length} />
     <div className="mt-3 h-px w-full bg-zinc-800/50" />
-    <div className="mt-4 flex-1 overflow-auto" aria-live="polite" aria-busy={listsLoading}>
+    <div className="mt-4 overflow-y-auto max-h-80 md:max-h-96" aria-live="polite" aria-busy={listsLoading}>
       {listsError ? (
         <p className="text-sm text-rose-400">{listsError}</p>
       ) : (
