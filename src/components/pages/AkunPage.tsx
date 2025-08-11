@@ -134,6 +134,9 @@ export default function AkunPage() {
   const [listsError, setListsError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [onlineOnly, setOnlineOnly] = useState(false);
+  const [onlyMine, setOnlyMine] = useState(false);
+  const [onlyLoggedIn, setOnlyLoggedIn] = useState(false);
+  const [onlyLoggedOut, setOnlyLoggedOut] = useState(false);
   const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(null);
   const [deleteCandidate, setDeleteCandidate] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -144,12 +147,22 @@ export default function AkunPage() {
   const filteredAdminAccounts = useMemo(() => {
     const q = search.trim().toLowerCase();
     const currentClientId = clientIdRef.current || getClientId();
-    const filtered = adminAccounts.filter((it) => (!onlineOnly || it.online) && (!q || it.adminName?.toLowerCase().includes(q) || it.name?.toLowerCase().includes(q)));
+    const filtered = adminAccounts.filter((it) => {
+      const matchesSearch = !q || it.adminName?.toLowerCase().includes(q) || it.name?.toLowerCase().includes(q);
+      const isCurrent = it.clientId === currentClientId;
+      // If onlyMine is on, ignore online/status filters and show all 'Anda' (current) entries
+      if (onlyMine) {
+        return isCurrent;
+      }
+      const matchesOnline = !onlineOnly || it.online;
+      const matchesStatus = onlyLoggedIn ? it.status === "logged-in" : onlyLoggedOut ? it.status === "logged-out" : true;
+      return matchesOnline && matchesSearch && matchesStatus;
+    });
     
     // Sort to put current user's account at the top, then by online status, then by recent activity
     return filtered.sort((a, b) => {
-      const aIsCurrent = a.clientId === currentClientId && a.name === profile?.loginId && a.adminName === profile?.adminName;
-      const bIsCurrent = b.clientId === currentClientId && b.name === profile?.loginId && b.adminName === profile?.adminName;
+      const aIsCurrent = a.clientId === currentClientId;
+      const bIsCurrent = b.clientId === currentClientId;
       
       // Priority 1: Current user's account always at top
       if (aIsCurrent && !bIsCurrent) return -1;
@@ -163,11 +176,16 @@ export default function AkunPage() {
       const bTime = new Date(b.signedInAt || 0).getTime();
       return bTime - aTime;
     });
-  }, [adminAccounts, onlineOnly, search, profile]);
+  }, [adminAccounts, onlineOnly, search, profile, onlyMine, onlyLoggedIn, onlyLoggedOut]);
   const filteredUserAccounts = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return userAccounts.filter((it) => (!onlineOnly || it.online) && (!q || it.name?.toLowerCase().includes(q)));
-  }, [userAccounts, onlineOnly, search]);
+    return userAccounts.filter((it) => {
+      const matchesOnline = !onlineOnly || it.online;
+      const matchesSearch = !q || it.name?.toLowerCase().includes(q);
+      const matchesStatus = onlyLoggedIn ? it.status === "logged-in" : onlyLoggedOut ? it.status === "logged-out" : true;
+      return matchesOnline && matchesSearch && matchesStatus;
+    });
+  }, [userAccounts, onlineOnly, search, onlyLoggedIn, onlyLoggedOut]);
 
   // Use same-origin API routes to avoid CORS and allow local fallback
   const ADMIN_URL = `/api/accounts/admin`;
@@ -648,6 +666,60 @@ return (
           <div className="flex items-center gap-3">
             <button
               role="switch"
+              aria-checked={onlyMine}
+              onClick={() => setOnlyMine((v) => !v)}
+              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all ${
+                onlyMine
+                  ? "border-yellow-500/30 bg-yellow-500/10 text-yellow-300"
+                  : "border-zinc-800/50 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800/50"
+              }`}
+              title="Tampilkan hanya akun Anda (admin)"
+            >
+              <User className="h-4 w-4" />
+              Hanya Akun Anda
+            </button>
+            <button
+              role="switch"
+              aria-checked={onlyLoggedIn}
+              onClick={() => {
+                setOnlyLoggedIn((v) => {
+                  const nv = !v;
+                  if (nv) setOnlyLoggedOut(false);
+                  return nv;
+                });
+              }}
+              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all ${
+                onlyLoggedIn
+                  ? "border-blue-500/30 bg-blue-500/10 text-blue-300"
+                  : "border-zinc-800/50 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800/50"
+              }`}
+              title="Tampilkan hanya yang status Logged In"
+            >
+              <LogIn className="h-4 w-4" />
+              Hanya Logged In
+            </button>
+            <button
+              role="switch"
+              aria-checked={onlyLoggedOut}
+              onClick={() => {
+                setOnlyLoggedOut((v) => {
+                  const nv = !v;
+                  if (nv) setOnlyLoggedIn(false);
+                  return nv;
+                });
+              }}
+              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all ${
+                onlyLoggedOut
+                  ? "border-rose-500/30 bg-rose-500/10 text-rose-300"
+                  : "border-zinc-800/50 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800/50"
+              }`}
+              title="Tampilkan hanya yang status Logged Out"
+            >
+              <LogOut className="h-4 w-4" />
+              Hanya Logged Out
+            </button>
+            <button
+              role="switch"
               aria-checked={onlineOnly}
               onClick={() => setOnlineOnly((v) => !v)}
               className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all ${
@@ -766,9 +838,9 @@ return (
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
           <div className="lg:col-span-1">
-            <div className="w-full max-w-md mx-auto rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm p-6">
+            <div className="w-full max-w-md mx-auto lg:max-w-none lg:mx-0 rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm p-6 h-full flex flex-col">
               <div className="mb-4">
                 <h2 className="text-xl font-bold text-white">Profil Admin</h2>
                 <p className="text-sm text-zinc-400 mt-1">Saat ini masuk</p>
@@ -813,7 +885,7 @@ return (
             </div>
           </div>
 
-          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[400px]">
+          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[400px] h-full">
             <AdminList />
             <UserList />
           </div>
