@@ -30,3 +30,41 @@ body {
 
 /* Ensure UA respects dark rendering for form controls, etc. */
 html { color-scheme: dark; background-color: #0a0a0a !important; }
+
+/*
+  Custom dark scrollbars (cross-browser)
+  Usage: add class "uv-scrollbar" to any scrollable container
+  - Chrome/Edge/Safari: styled via ::-webkit-scrollbar* selectors
+  - Firefox: styled via scrollbar-width and scrollbar-color
+*/
+.uv-scrollbar {
+  /* Firefox */
+  scrollbar-width: thin; /* auto | thin | none */
+  scrollbar-color: #3f3f46 #0b0b0b; /* thumb track */
+  /* iOS Safari momentum scrolling */
+  -webkit-overflow-scrolling: touch;
+}
+.uv-scrollbar.uv-scrollbar--thin {
+  scrollbar-width: thin;
+}
+
+/* WebKit-based (Chrome, Edge, Safari) */
+.uv-scrollbar::-webkit-scrollbar {
+  width: 10px;  /* vertical */
+  height: 10px; /* horizontal */
+}
+.uv-scrollbar::-webkit-scrollbar-track {
+  background: #0b0b0b; /* near-zinc-950 */
+  border-radius: 9999px;
+}
+.uv-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #3f3f46; /* zinc-700 */
+  border-radius: 9999px;
+  border: 2px solid #0b0b0b; /* creates padding around thumb */
+}
+.uv-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #52525b; /* zinc-600 */
+}
+.uv-scrollbar::-webkit-scrollbar-corner {
+  background: transparent;
+}

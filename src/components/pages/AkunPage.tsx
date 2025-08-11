@@ -437,7 +437,7 @@ const AdminList: React.FC = () => {
     <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm p-4 h-full flex flex-col">
       <PanelHeader title="Akun Admin" onRefresh={loadLists} count={filteredAdminAccounts.length} />
       <div className="mt-3 h-px w-full bg-zinc-800/50" />
-      <div className="mt-4 overflow-y-auto max-h-80 md:max-h-96" aria-live="polite" aria-busy={listsLoading}>
+      <div className="mt-4 overflow-y-auto max-h-80 md:max-h-96 uv-scrollbar uv-scrollbar--thin overscroll-contain" aria-live="polite" aria-busy={listsLoading}>
         {listsError ? (
           <p className="text-sm text-rose-400">{listsError}</p>
         ) : (
@@ -521,7 +521,7 @@ const UserList: React.FC = () => (
   <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm p-4 h-full flex flex-col">
     <PanelHeader title="Akun Pengguna" onRefresh={loadLists} count={filteredUserAccounts.length} />
     <div className="mt-3 h-px w-full bg-zinc-800/50" />
-    <div className="mt-4 overflow-y-auto max-h-80 md:max-h-96" aria-live="polite" aria-busy={listsLoading}>
+    <div className="mt-4 overflow-y-auto max-h-80 md:max-h-96 uv-scrollbar uv-scrollbar--thin overscroll-contain" aria-live="polite" aria-busy={listsLoading}>
       {listsError ? (
         <p className="text-sm text-rose-400">{listsError}</p>
       ) : (
