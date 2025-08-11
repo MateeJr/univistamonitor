@@ -17,7 +17,7 @@ const TABS: Array<{ key: TabKey; label: string; Icon: any; href: string }> = [
 export default function NavBar() {
   const pathname = usePathname() || "/";
   return (
-    <div className="fixed z-50 top-0 left-0 right-0 w-full md:top-0 md:left-0 md:h-screen md:w-[80px]">
+    <div className="fixed z-50 top-0 left-0 right-0 w-full md:right-auto md:h-screen md:w-[80px]">
       <div
         className="relative flex w-full h-[72px] md:h-full md:w-full flex-row md:flex-col items-center md:items-center justify-around md:justify-start border-b md:border-b-0 md:border-r border-[#1a1a1a] bg-black/90 backdrop-blur-md shadow-[0_6px_24px_rgba(0,0,0,0.45)] md:shadow-[6px_0_24px_rgba(0,0,0,0.45)]"
       >

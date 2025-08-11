@@ -26,10 +26,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-[#ededed] min-h-[100dvh]`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-[#ededed] min-h-[100dvh] overflow-x-hidden`}>
         <NavBar />
         <PresenceManager />
-        <div className="pt-[80px] md:pt-0 md:pl-[96px]">
+        <div className="pt-[80px] md:pt-0 md:pl-[96px] box-border overflow-x-hidden">
           {children}
         </div>
       </body>
