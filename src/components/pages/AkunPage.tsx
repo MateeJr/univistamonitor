@@ -384,7 +384,7 @@ export default function AkunPage() {
             type="button"
             onClick={onRefresh}
             className="inline-flex items-center gap-2 rounded-lg border border-zinc-700/50 bg-zinc-800/50 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-700/50"
-            aria-label="Refresh list"
+            aria-label="Refresh daftar"
           >
             <RefreshCw className={`h-4 w-4 ${listsLoading ? "animate-spin" : ""}`} />
             <span className="hidden sm:inline">Refresh</span>
@@ -427,7 +427,7 @@ const AdminList: React.FC = () => {
   
   return (
     <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm p-4 h-full flex flex-col">
-      <PanelHeader title="Admin Accounts" onRefresh={loadLists} count={filteredAdminAccounts.length} />
+      <PanelHeader title="Akun Admin" onRefresh={loadLists} count={filteredAdminAccounts.length} />
       <div className="mt-3 h-px w-full bg-zinc-800/50" />
       <div className="mt-4 flex-1 overflow-auto" aria-live="polite" aria-busy={listsLoading}>
         {listsError ? (
@@ -449,7 +449,7 @@ const AdminList: React.FC = () => {
             ) : filteredAdminAccounts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <Shield className="h-12 w-12 text-zinc-600 mb-2" />
-                <p className="text-sm text-zinc-400">No admin accounts found</p>
+                <p className="text-sm text-zinc-400">Tidak ada akun admin ditemukan</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -471,7 +471,7 @@ const AdminList: React.FC = () => {
                             <span className="truncate font-semibold text-white">{it.adminName || "-"}</span>
                             {isCurrentUser && (
                               <span className="inline-flex items-center rounded-full bg-yellow-500/10 border border-yellow-500/30 px-2 py-0.5 text-xs font-medium text-yellow-400">
-                                You
+                                Anda
                               </span>
                             )}
                             <span className="truncate text-xs text-zinc-500">({it.name || ""})</span>
@@ -486,7 +486,7 @@ const AdminList: React.FC = () => {
                             {it.lastSeenAt && (
                               <>
                                 <span className="mx-2 text-zinc-600">•</span>
-                                <span>Last: {formatDate(it.lastSeenAt)}</span>
+                                <span>Terakhir: {formatDate(it.lastSeenAt)}</span>
                               </>
                             )}
                           </div>
@@ -511,7 +511,7 @@ const AdminList: React.FC = () => {
 
 const UserList: React.FC = () => (
   <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm p-4 h-full flex flex-col">
-    <PanelHeader title="User Accounts" onRefresh={loadLists} count={filteredUserAccounts.length} />
+    <PanelHeader title="Akun Pengguna" onRefresh={loadLists} count={filteredUserAccounts.length} />
     <div className="mt-3 h-px w-full bg-zinc-800/50" />
     <div className="mt-4 flex-1 overflow-auto" aria-live="polite" aria-busy={listsLoading}>
       {listsError ? (
@@ -533,7 +533,7 @@ const UserList: React.FC = () => (
           ) : filteredUserAccounts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <Users className="h-12 w-12 text-zinc-600 mb-2" />
-              <p className="text-sm text-zinc-400">No user accounts found</p>
+              <p className="text-sm text-zinc-400">Tidak ada akun pengguna ditemukan</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -561,7 +561,7 @@ const UserList: React.FC = () => (
                         {it.lastSeenAt && (
                           <>
                             <span className="mx-2 text-zinc-600">•</span>
-                            <span>Last: {formatDate(it.lastSeenAt)}</span>
+                            <span>Terakhir: {formatDate(it.lastSeenAt)}</span>
                           </>
                         )}
                       </div>
@@ -576,8 +576,8 @@ const UserList: React.FC = () => (
                         disabled={deleting}
                         aria-disabled={deleting}
                         className="rounded-md border border-zinc-700/50 bg-zinc-800/50 px-2 py-1 text-zinc-300 transition-colors hover:bg-red-900/20 hover:border-red-700/50 hover:text-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                        aria-label={`Delete ${it.name}`}
-                        title="Delete account"
+                        aria-label={`Hapus ${it.name}`}
+                        title="Hapus akun"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -598,14 +598,14 @@ return (
     <div className="mx-auto max-w-7xl space-y-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Account Management</h1>
-          <p className="text-sm text-zinc-400 mt-1">Manage admin sessions and monitor active accounts</p>
+          <h1 className="text-2xl font-bold text-white">Manajemen Akun</h1>
+          <p className="text-sm text-zinc-400 mt-1">Kelola sesi admin dan pantau akun aktif</p>
         </div>
         {profile && (
           <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2">
             <div className="h-2 w-2 rounded-full bg-emerald-400" />
             <span className="text-sm font-medium text-emerald-300">
-              {adminOnline + userOnline} users online
+              {adminOnline + userOnline} pengguna online
             </span>
           </div>
         )}
@@ -614,12 +614,12 @@ return (
       {profile && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <StatCard title="Admin Online" value={adminOnline} icon={<Shield className="h-4 w-4" />} tone="cyan" />
-          <StatCard title="User Online" value={userOnline} icon={<Users className="h-4 w-4" />} tone="emerald" />
+          <StatCard title="Pengguna Online" value={userOnline} icon={<Users className="h-4 w-4" />} tone="emerald" />
           <StatCard
             title="Total Online"
             value={adminOnline + userOnline}
             icon={<Clock className="h-4 w-4" />}
-            hint={lastRefreshedAt ? `Updated ${formatTime(lastRefreshedAt)}` : undefined}
+            hint={lastRefreshedAt ? `Diperbarui ${formatTime(lastRefreshedAt)}` : undefined}
             tone="zinc"
           />
         </div>
@@ -630,9 +630,9 @@ return (
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
             <input
-              aria-label="Search accounts"
+              aria-label="Cari akun"
               className="w-full md:w-80 rounded-lg border border-zinc-800/50 bg-zinc-900/50 pl-10 pr-4 py-2.5 text-sm text-zinc-200 placeholder-zinc-500 backdrop-blur-sm outline-none transition-colors focus:border-blue-500/50 focus:bg-zinc-900/80"
-              placeholder="Search by name..."
+              placeholder="Cari berdasarkan nama..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -649,7 +649,7 @@ return (
               }`}
             >
               <div className={`h-2 w-2 rounded-full ${onlineOnly ? "bg-emerald-400" : "bg-zinc-500"}`} />
-              Online only
+              Hanya online
             </button>
             <button
               type="button"
@@ -668,8 +668,8 @@ return (
           {!profile ? (
             <div className="w-full max-w-md mx-auto rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm p-6">
               <div className="mb-6">
-                <h2 className="text-xl font-bold text-white">Admin Login</h2>
-                <p className="text-sm text-zinc-400 mt-1">Access the monitoring dashboard</p>
+                <h2 className="text-xl font-bold text-white">Login Admin</h2>
+                <p className="text-sm text-zinc-400 mt-1">Akses dashboard monitoring</p>
               </div>
 
               <form
@@ -681,13 +681,13 @@ return (
               >
                 <div>
                   <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2">
-                    Login ID
+                    ID Login
                   </label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
                     <input
                       type="text"
-                      placeholder="Enter login ID"
+                      placeholder="Masukkan ID login"
                       className="w-full rounded-lg border border-zinc-800/50 bg-zinc-900/80 pl-10 pr-4 py-2.5 text-sm text-zinc-200 placeholder-zinc-500 outline-none transition-colors focus:border-blue-500/50 focus:bg-zinc-900"
                       value={loginId}
                       onChange={(e) => setLoginId(e.target.value.toUpperCase())}
@@ -699,13 +699,13 @@ return (
 
                 <div>
                   <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2">
-                    Admin Name
+                    Nama Admin
                   </label>
                   <div className="relative">
                     <UserCheck className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
                     <input
                       type="text"
-                      placeholder="Enter admin name"
+                      placeholder="Masukkan nama admin"
                       className="w-full rounded-lg border border-zinc-800/50 bg-zinc-900/80 pl-10 pr-4 py-2.5 text-sm text-zinc-200 placeholder-zinc-500 outline-none transition-colors focus:border-blue-500/50 focus:bg-zinc-900"
                       value={adminName}
                       onChange={(e) => setAdminName(e.target.value)}
@@ -717,12 +717,12 @@ return (
 
                 <div>
                   <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2">
-                    Password
+                    Kata Sandi
                   </label>
                   <div className="relative">
                     <input
                       type={showPassword ? "text" : "password"}
-                      placeholder="Enter admin password"
+                      placeholder="Masukkan kata sandi admin"
                       className="w-full rounded-lg border border-zinc-800/50 bg-zinc-900/80 pl-4 pr-12 py-2.5 text-sm text-zinc-200 placeholder-zinc-500 outline-none transition-colors focus:border-blue-500/50 focus:bg-zinc-900"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -732,7 +732,7 @@ return (
                       type="button"
                       onClick={() => setShowPassword((v) => !v)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -753,15 +753,15 @@ return (
                   ) : (
                     <LogIn className="h-4 w-4" />
                   )}
-                  {loading ? "Signing in..." : "Sign In"}
+                  {loading ? "Sedang masuk..." : "Masuk"}
                 </button>
               </form>
             </div>
           ) : (
             <div className="w-full max-w-md mx-auto rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm p-6">
               <div className="mb-4">
-                <h2 className="text-xl font-bold text-white">Admin Profile</h2>
-                <p className="text-sm text-zinc-400 mt-1">Currently logged in</p>
+                <h2 className="text-xl font-bold text-white">Profil Admin</h2>
+                <p className="text-sm text-zinc-400 mt-1">Saat ini masuk</p>
               </div>
               
               <div className="space-y-4">
@@ -777,11 +777,11 @@ return (
 
                 <div className="space-y-3 pt-2">
                   <div className="flex justify-between items-center py-2">
-                    <span className="text-sm text-zinc-400">Login ID</span>
+                    <span className="text-sm text-zinc-400">ID Login</span>
                     <span className="text-sm font-medium text-white">{profile.loginId}</span>
                   </div>
                   <div className="flex justify-between items-center py-2">
-                    <span className="text-sm text-zinc-400">Last Login</span>
+                    <span className="text-sm text-zinc-400">Login Terakhir</span>
                     <span className="text-sm font-medium text-white">{formatDate(profile.signedInAt)}</span>
                   </div>
                 </div>
@@ -797,7 +797,7 @@ return (
                   ) : (
                     <LogOut className="h-4 w-4" />
                   )}
-                  {loading ? "Signing out..." : "Sign Out"}
+                  {loading ? "Sedang keluar..." : "Keluar"}
                 </button>
               </div>
             </div>
@@ -819,9 +819,9 @@ return (
       />
       <ConfirmDeleteModal
         visible={!!deleteCandidate}
-        title="Delete User Account?"
-        description={`Are you sure you want to delete "${deleteCandidate || ""}" from the list?`}
-        confirmLabel={deleting ? "Deleting..." : "Delete"}
+        title="Hapus Akun Pengguna?"
+        description={`Apakah Anda yakin ingin menghapus "${deleteCandidate || ""}" dari daftar?`}
+        confirmLabel={deleting ? "Menghapus..." : "Hapus"}
         onConfirm={() => deleteCandidate && deleteUser(deleteCandidate)}
         onClose={() => !deleting && setDeleteCandidate(null)}
       />
