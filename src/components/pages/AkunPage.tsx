@@ -143,7 +143,18 @@ export default function AkunPage() {
 
   const filteredAdminAccounts = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return adminAccounts.filter((it) => (!onlineOnly || it.online) && (!q || it.adminName?.toLowerCase().includes(q) || it.name?.toLowerCase().includes(q)));
+    const currentClientId = clientIdRef.current || getClientId();
+    const filtered = adminAccounts.filter((it) => (!onlineOnly || it.online) && (!q || it.adminName?.toLowerCase().includes(q) || it.name?.toLowerCase().includes(q)));
+    
+    // Sort to put current user's account at the top
+    return filtered.sort((a, b) => {
+      const aIsCurrent = a.clientId === currentClientId;
+      const bIsCurrent = b.clientId === currentClientId;
+      
+      if (aIsCurrent && !bIsCurrent) return -1;
+      if (!aIsCurrent && bIsCurrent) return 1;
+      return 0; // Keep original order for other accounts
+    });
   }, [adminAccounts, onlineOnly, search]);
   const filteredUserAccounts = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -411,79 +422,92 @@ export default function AkunPage() {
     );
   };
 
-const AdminList: React.FC = () => (
-  <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm p-4 h-full flex flex-col">
-    <PanelHeader title="Admin Accounts" onRefresh={loadLists} count={filteredAdminAccounts.length} />
-    <div className="mt-3 h-px w-full bg-zinc-800/50" />
-    <div className="mt-4 flex-1 overflow-auto" aria-live="polite" aria-busy={listsLoading}>
-      {listsError ? (
-        <p className="text-sm text-rose-400">{listsError}</p>
-      ) : (
-        <>
-          {listsLoading && filteredAdminAccounts.length === 0 ? (
-            <div className="space-y-3">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={`s-a-${i}`} className="animate-pulse rounded-lg border border-zinc-800/50 bg-zinc-800/30 p-3">
-                  <div className="h-4 w-32 rounded bg-zinc-700/50" />
-                  <div className="mt-2 flex items-center gap-2">
-                    <div className="h-3 w-16 rounded bg-zinc-700/50" />
-                    <div className="h-3 w-24 rounded bg-zinc-700/50" />
+const AdminList: React.FC = () => {
+  const currentClientId = clientIdRef.current || getClientId();
+  
+  return (
+    <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm p-4 h-full flex flex-col">
+      <PanelHeader title="Admin Accounts" onRefresh={loadLists} count={filteredAdminAccounts.length} />
+      <div className="mt-3 h-px w-full bg-zinc-800/50" />
+      <div className="mt-4 flex-1 overflow-auto" aria-live="polite" aria-busy={listsLoading}>
+        {listsError ? (
+          <p className="text-sm text-rose-400">{listsError}</p>
+        ) : (
+          <>
+            {listsLoading && filteredAdminAccounts.length === 0 ? (
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={`s-a-${i}`} className="animate-pulse rounded-lg border border-zinc-800/50 bg-zinc-800/30 p-3">
+                    <div className="h-4 w-32 rounded bg-zinc-700/50" />
+                    <div className="mt-2 flex items-center gap-2">
+                      <div className="h-3 w-16 rounded bg-zinc-700/50" />
+                      <div className="h-3 w-24 rounded bg-zinc-700/50" />
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : filteredAdminAccounts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <Shield className="h-12 w-12 text-zinc-600 mb-2" />
-              <p className="text-sm text-zinc-400">No admin accounts found</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {filteredAdminAccounts.map((it, idx) => (
-                <div
-                  key={`${it.clientId || it.name || "admin"}-${idx}`}
-                  className={`group rounded-lg border p-3 transition-all duration-200 hover:bg-zinc-800/40 ${
-                    it.online 
-                      ? "border-emerald-500/30 bg-emerald-500/5" 
-                      : "border-zinc-800/50 bg-zinc-800/20"
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="truncate font-semibold text-white">{it.adminName || "-"}</span>
-                        <span className="truncate text-xs text-zinc-500">({it.name || ""})</span>
-                      </div>
-                      <div className="mt-1 text-xs text-zinc-400">
-                        <span className={`inline-flex items-center gap-1 ${it.status === "logged-in" ? "text-emerald-400" : "text-zinc-300"}`}>
-                          <StatusDot online={!!it.online} />
-                          {it.status || "-"}
-                        </span>
-                        <span className="mx-2 text-zinc-600">•</span>
-                        <span>{formatDate(it.signedInAt)}</span>
-                        {it.lastSeenAt && (
-                          <>
+                ))}
+              </div>
+            ) : filteredAdminAccounts.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <Shield className="h-12 w-12 text-zinc-600 mb-2" />
+                <p className="text-sm text-zinc-400">No admin accounts found</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {filteredAdminAccounts.map((it, idx) => {
+                  const isCurrentUser = it.clientId === currentClientId;
+                  
+                  return (
+                    <div
+                      key={`${it.clientId || it.name || "admin"}-${idx}`}
+                      className={`group rounded-lg border p-3 transition-all duration-200 hover:bg-zinc-800/40 ${
+                        it.online 
+                          ? "border-emerald-500/30 bg-emerald-500/5" 
+                          : "border-zinc-800/50 bg-zinc-800/20"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="truncate font-semibold text-white">{it.adminName || "-"}</span>
+                            {isCurrentUser && (
+                              <span className="inline-flex items-center rounded-full bg-yellow-500/10 border border-yellow-500/30 px-2 py-0.5 text-xs font-medium text-yellow-400">
+                                You
+                              </span>
+                            )}
+                            <span className="truncate text-xs text-zinc-500">({it.name || ""})</span>
+                          </div>
+                          <div className="mt-1 text-xs text-zinc-400">
+                            <span className={`inline-flex items-center gap-1 ${it.status === "logged-in" ? "text-emerald-400" : "text-zinc-300"}`}>
+                              <StatusDot online={!!it.online} />
+                              {it.status || "-"}
+                            </span>
                             <span className="mx-2 text-zinc-600">•</span>
-                            <span>Last: {formatDate(it.lastSeenAt)}</span>
-                          </>
-                        )}
+                            <span>{formatDate(it.signedInAt)}</span>
+                            {it.lastSeenAt && (
+                              <>
+                                <span className="mx-2 text-zinc-600">•</span>
+                                <span>Last: {formatDate(it.lastSeenAt)}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className={`text-xs font-medium ${it.online ? "text-emerald-400" : "text-zinc-400"}`}>
+                            {it.online ? "Online" : "Offline"}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <span className={`text-xs font-medium ${it.online ? "text-emerald-400" : "text-zinc-400"}`}>
-                        {it.online ? "Online" : "Offline"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </>
-      )}
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const UserList: React.FC = () => (
   <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm p-4 h-full flex flex-col">
