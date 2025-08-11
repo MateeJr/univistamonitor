@@ -16,62 +16,100 @@ const TABS: Array<{ key: TabKey; label: string; Icon: any; href: string }> = [
 
 export default function NavBar() {
   const pathname = usePathname() || "/";
+  
   return (
-    <div className="fixed z-50 top-0 left-0 right-0 w-full md:right-auto md:h-screen md:w-[80px]">
-      <div
-        className="relative flex w-full h-[72px] md:h-full md:w-full flex-row md:flex-col items-center md:items-center justify-around md:justify-start border-b md:border-b-0 md:border-r border-[#1a1a1a] bg-black/90 backdrop-blur-md shadow-[0_6px_24px_rgba(0,0,0,0.45)] md:shadow-[6px_0_24px_rgba(0,0,0,0.45)]"
-      >
-        {/* subtle glow lines */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent md:hidden" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent hidden md:block" />
-        {TABS.map(({ key, label, Icon, href }) => {
-          const isActive = pathname === href;
-          return (
-            <Link
-              key={key}
-              href={href}
-              aria-label={label}
-              aria-current={isActive ? "page" : undefined}
-              className="group relative flex flex-1 md:flex-none w-auto md:w-full flex-col items-center py-2 outline-none transition-all duration-200 ease-out hover:bg-white/[0.03] focus-visible:ring-2 focus-visible:ring-white/20"
-            >
-              {/* active indicator bar */}
-              {isActive && (
-                <span className="pointer-events-none absolute bottom-0 left-1/2 h-1 w-9 -translate-x-1/2 rounded-t bg-white/80 shadow-[0_0_12px_rgba(255,255,255,0.6)] md:hidden" />
-              )}
-              {isActive && (
-                <span className="pointer-events-none absolute right-0 top-1/2 h-9 w-1 -translate-y-1/2 rounded-l bg-white/80 shadow-[0_0_12px_rgba(255,255,255,0.6)] hidden md:block" />
-              )}
-              {/* hover/active radial glow behind icon */}
-              <span
-                aria-hidden
-                className={`pointer-events-none absolute top-2 left-1/2 -z-0 h-14 w-14 -translate-x-1/2 rounded-full blur-xl opacity-0 transition duration-300 ${
-                  isActive ? "opacity-60 bg-white/20" : "group-hover:opacity-40 bg-white/10"
-                }`}
-              />
-              <span
-                className={`relative z-10 flex h-9 w-9 items-center justify-center rounded-full border transition-transform duration-200 will-change-transform ${
-                  isActive
-                    ? "border-[#262626] bg-[rgba(255,255,255,0.06)] shadow-[0_6px_12px_rgba(255,255,255,0.35)]"
-                    : "border-[#1a1a1a] group-hover:scale-105 active:scale-95"
-                }`}
-              >
-                <Icon
-                  size={22}
-                  strokeWidth={2}
-                  color={isActive ? "#ffffff" : "#888888"}
-                />
-              </span>
-              <span
-                className={`mt-1.5 text-[11px] font-semibold tracking-[0.02em] transition-colors duration-200 ${
-                  isActive ? "text-[#f2f2f2]" : "text-[#9a9a9a] group-hover:text-[#d6d6d6]"
-                }`}
-              >
-                {label}
-              </span>
-            </Link>
-          );
-        })}
+    <nav className="fixed z-50 top-0 left-0 right-0 w-full md:right-auto md:h-screen md:w-20 md:top-0">
+      {/* Mobile Navigation - Top Bar */}
+      <div className="md:hidden">
+        <div className="bg-zinc-900/95 backdrop-blur-xl border-b border-zinc-800/50 px-4 py-2">
+          <div className="flex items-center justify-between max-w-screen-xl mx-auto">
+            {TABS.map(({ key, label, Icon, href }) => {
+              const isActive = pathname === href;
+              return (
+                <Link
+                  key={key}
+                  href={href}
+                  className={`group relative flex flex-col items-center gap-1 py-2 px-3 rounded-xl transition-all duration-300 ${
+                    isActive 
+                      ? "bg-zinc-800/60 text-white" 
+                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/30"
+                  }`}
+                >
+                  <div className={`relative ${isActive ? "text-blue-400" : ""}`}>
+                    <Icon 
+                      size={20} 
+                      strokeWidth={isActive ? 2.5 : 2}
+                      className="transition-all duration-300"
+                    />
+                    {isActive && (
+                      <div className="absolute inset-0 bg-blue-400/20 blur-lg rounded-full" />
+                    )}
+                  </div>
+                  <span className={`text-[10px] font-medium tracking-wide ${
+                    isActive ? "text-white" : "text-zinc-500"
+                  }`}>
+                    {label}
+                  </span>
+                  {isActive && (
+                    <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-blue-400 rounded-full" />
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       </div>
-    </div>
+
+      {/* Desktop Navigation - Sidebar */}
+      <div className="hidden md:flex h-full">
+        <div className="flex flex-col w-full bg-zinc-900/95 backdrop-blur-xl border-r border-zinc-800/50">
+          {/* Navigation Links */}
+          <div className="flex flex-col flex-1 gap-2 p-3 pt-6">
+            {TABS.map(({ key, label, Icon, href }) => {
+              const isActive = pathname === href;
+              return (
+                <Link
+                  key={key}
+                  href={href}
+                  title={label}
+                  className={`group relative flex items-center justify-center w-full h-12 rounded-xl transition-all duration-300 ${
+                    isActive 
+                      ? "bg-zinc-800/80 text-white shadow-lg" 
+                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+                  }`}
+                >
+                  <div className="relative">
+                    <Icon 
+                      size={22} 
+                      strokeWidth={isActive ? 2.5 : 2}
+                      className={`transition-all duration-300 ${
+                        isActive ? "text-blue-400" : ""
+                      }`}
+                    />
+                    {isActive && (
+                      <>
+                        <div className="absolute inset-0 bg-blue-400/20 blur-xl rounded-full" />
+                        <div className="absolute -right-6 top-1/2 transform -translate-y-1/2 w-1 h-6 bg-blue-400 rounded-full" />
+                      </>
+                    )}
+                  </div>
+                  
+                  {/* Tooltip */}
+                  <div className="absolute left-full ml-3 px-3 py-1.5 bg-zinc-800 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap shadow-xl border border-zinc-700">
+                    {label}
+                    <div className="absolute left-0 top-1/2 transform -translate-x-1 -translate-y-1/2 w-2 h-2 bg-zinc-800 border-l border-b border-zinc-700 rotate-45" />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Bottom Decoration */}
+          <div className="p-4 border-t border-zinc-800/50">
+            <div className="w-8 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mx-auto" />
+          </div>
+        </div>
+      </div>
+    </nav>
   );
 }

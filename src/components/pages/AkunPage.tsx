@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Eye, EyeOff, LogIn, LogOut, User, Users, Shield, Clock, Search, RefreshCw, Loader2, Trash2 } from "lucide-react";
+import { Eye, EyeOff, LogIn, LogOut, User, Users, Shield, Clock, Search, RefreshCw, Loader2, Trash2, UserCheck } from "lucide-react";
 import { ENDPOINTS, SERVER_BASE } from "@/components/config/server";
 import WrongPassModal from "@/components/modals/WrongPassModal";
 import ConfirmDeleteModal from "@/components/modals/ConfirmDeleteModal";
@@ -360,10 +360,10 @@ export default function AkunPage() {
   const PanelHeader: React.FC<{ title: string; onRefresh?: () => void; count?: number }>
     = ({ title, onRefresh, count }) => (
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h2 className="text-[15px] md:text-[16px] font-semibold tracking-tight text-white/95">{title}</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-semibold text-white">{title}</h2>
           {typeof count === "number" && (
-            <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[11px] text-zinc-300">
+            <span className="inline-flex items-center rounded-full border border-zinc-700/50 bg-zinc-800/50 px-2.5 py-1 text-xs font-medium text-zinc-300">
               {count}
             </span>
           )}
@@ -372,11 +372,11 @@ export default function AkunPage() {
           <button
             type="button"
             onClick={onRefresh}
-            className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-xs text-zinc-200 transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
-            aria-label="Refresh daftar"
+            className="inline-flex items-center gap-2 rounded-lg border border-zinc-700/50 bg-zinc-800/50 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-700/50"
+            aria-label="Refresh list"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${listsLoading ? "animate-spin" : ""}`} />
-            <span className="hidden md:inline">Refresh</span>
+            <RefreshCw className={`h-4 w-4 ${listsLoading ? "animate-spin" : ""}`} />
+            <span className="hidden sm:inline">Refresh</span>
           </button>
         )}
       </div>
@@ -391,23 +391,20 @@ export default function AkunPage() {
   }> = ({ title, value, icon, hint, tone = "zinc" }) => {
     const toneClass =
       tone === "emerald"
-        ? "bg-emerald-500/15 border-emerald-500/20 text-emerald-300"
+        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
         : tone === "cyan"
-        ? "bg-cyan-500/15 border-cyan-500/20 text-cyan-300"
-        : "bg-white/5 border-white/10 text-zinc-300";
+        ? "bg-blue-500/10 border-blue-500/30 text-blue-400"
+        : "bg-zinc-800/50 border-zinc-700/50 text-zinc-300";
     return (
-      <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(to_bottom,#0b0b0c,#0a0a0a)]">
-        <div className="pointer-events-none absolute inset-0 opacity-60 [mask-image:radial-gradient(200px_100px_at_0%_0%,black,transparent)]" />
-        <div className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-[11px] uppercase tracking-wide text-zinc-400">{title}</div>
-              <div className="mt-1 text-[22px] font-semibold text-white">{value}</div>
-              {hint ? <div className="mt-1 text-xs text-zinc-500">{hint}</div> : null}
-            </div>
-            <div className={`grid h-9 w-9 place-items-center rounded-full border ${toneClass}`}>
-              {icon}
-            </div>
+      <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm p-4 transition-colors hover:bg-zinc-800/30">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-xs uppercase tracking-wide text-zinc-400 font-medium">{title}</div>
+            <div className="mt-2 text-2xl font-bold text-white">{value}</div>
+            {hint && <div className="mt-1 text-xs text-zinc-500">{hint}</div>}
+          </div>
+          <div className={`flex h-10 w-10 items-center justify-center rounded-lg border ${toneClass}`}>
+            {icon}
           </div>
         </div>
       </div>
@@ -415,61 +412,72 @@ export default function AkunPage() {
   };
 
 const AdminList: React.FC = () => (
-  <div className="rounded-2xl border border-white/10 bg-[linear-gradient(to_bottom,#0b0b0c,#0a0a0a)] p-5 shadow-[0_10px_40px_rgba(0,0,0,0.5)] md:h-full md:min-h-0 flex flex-col">
-    <PanelHeader title="List Akun Admin" onRefresh={loadLists} count={filteredAdminAccounts.length} />
-    <div className="mt-3 h-px w-full bg-white/10" />
-    <div className="mt-3 md:flex-1 md:overflow-auto" aria-live="polite" aria-busy={listsLoading}>
+  <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm p-4 h-full flex flex-col">
+    <PanelHeader title="Admin Accounts" onRefresh={loadLists} count={filteredAdminAccounts.length} />
+    <div className="mt-3 h-px w-full bg-zinc-800/50" />
+    <div className="mt-4 flex-1 overflow-auto" aria-live="polite" aria-busy={listsLoading}>
       {listsError ? (
         <p className="text-sm text-rose-400">{listsError}</p>
       ) : (
         <>
           {listsLoading && filteredAdminAccounts.length === 0 ? (
-            <ul className="space-y-2">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <li key={`s-a-${i}`} className="animate-pulse rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2">
-                  <div className="h-4 w-32 rounded bg-white/10" />
+            <div className="space-y-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={`s-a-${i}`} className="animate-pulse rounded-lg border border-zinc-800/50 bg-zinc-800/30 p-3">
+                  <div className="h-4 w-32 rounded bg-zinc-700/50" />
                   <div className="mt-2 flex items-center gap-2">
-                    <div className="h-3 w-16 rounded bg-white/10" />
-                    <div className="h-3 w-24 rounded bg-white/10" />
-                    <div className="h-3 w-20 rounded bg-white/10" />
+                    <div className="h-3 w-16 rounded bg-zinc-700/50" />
+                    <div className="h-3 w-24 rounded bg-zinc-700/50" />
                   </div>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           ) : filteredAdminAccounts.length === 0 ? (
-            <p className="text-sm text-zinc-400">Tidak ada data yang cocok.</p>
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <Shield className="h-12 w-12 text-zinc-600 mb-2" />
+              <p className="text-sm text-zinc-400">No admin accounts found</p>
+            </div>
           ) : (
-            <ul className="space-y-2">
+            <div className="space-y-2">
               {filteredAdminAccounts.map((it, idx) => (
-                <li
+                <div
                   key={`${it.clientId || it.name || "admin"}-${idx}`}
-                  className={`group flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 transition-colors hover:bg-white/[0.06] ${it.online ? "ring-1 ring-inset ring-emerald-500/20" : "ring-1 ring-inset ring-rose-500/20"}`}
+                  className={`group rounded-lg border p-3 transition-all duration-200 hover:bg-zinc-800/40 ${
+                    it.online 
+                      ? "border-emerald-500/30 bg-emerald-500/5" 
+                      : "border-zinc-800/50 bg-zinc-800/20"
+                  }`}
                 >
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="truncate text-sm font-semibold text-white/95">{it.adminName || "-"}</span>
-                      <span className="truncate text-xs text-zinc-400">({it.name || ""})</span>
+                  <div className="flex items-start justify-between">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="truncate font-semibold text-white">{it.adminName || "-"}</span>
+                        <span className="truncate text-xs text-zinc-500">({it.name || ""})</span>
+                      </div>
+                      <div className="mt-1 text-xs text-zinc-400">
+                        <span className={`inline-flex items-center gap-1 ${it.status === "logged-in" ? "text-emerald-400" : "text-zinc-300"}`}>
+                          <StatusDot online={!!it.online} />
+                          {it.status || "-"}
+                        </span>
+                        <span className="mx-2 text-zinc-600">•</span>
+                        <span>{formatDate(it.signedInAt)}</span>
+                        {it.lastSeenAt && (
+                          <>
+                            <span className="mx-2 text-zinc-600">•</span>
+                            <span>Last: {formatDate(it.lastSeenAt)}</span>
+                          </>
+                        )}
+                      </div>
                     </div>
-                    <div className="mt-0.5 text-[12px] text-zinc-400">
-                      <span className="text-zinc-500">Status:</span>
-                      <span className={`ml-1 font-medium ${it.status === "logged-in" ? "text-emerald-400" : "text-zinc-300"}`}>{it.status || "-"}</span>
-                      <span className="mx-2">•</span>
-                      <span className="text-zinc-500">Masuk:</span> <span>{formatDate(it.signedInAt)}</span>
-                      {it.lastSeenAt && (
-                        <>
-                          <span className="mx-2">•</span>
-                          <span className="text-zinc-500">Aktif:</span> <span>{formatDate(it.lastSeenAt)}</span>
-                        </>
-                      )}
+                    <div className="flex items-center gap-1">
+                      <span className={`text-xs font-medium ${it.online ? "text-emerald-400" : "text-zinc-400"}`}>
+                        {it.online ? "Online" : "Offline"}
+                      </span>
                     </div>
                   </div>
-                  <div className="ml-3 flex shrink-0 items-center gap-2">
-                    <StatusDot online={!!it.online} />
-                    <span className="text-xs text-zinc-400">{it.online ? "Online" : "Offline"}</span>
-                  </div>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
         </>
       )}
@@ -478,71 +486,82 @@ const AdminList: React.FC = () => (
 );
 
 const UserList: React.FC = () => (
-  <div className="rounded-2xl border border-white/10 bg-[linear-gradient(to_bottom,#0b0b0c,#0a0a0a)] p-5 shadow-[0_10px_40px_rgba(0,0,0,0.5)] md:h-full md:min-h-0 flex flex-col">
-    <PanelHeader title="List Akun User" onRefresh={loadLists} count={filteredUserAccounts.length} />
-    <div className="mt-3 h-px w-full bg-white/10" />
-    <div className="mt-3 md:flex-1 md:overflow-auto" aria-live="polite" aria-busy={listsLoading}>
+  <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm p-4 h-full flex flex-col">
+    <PanelHeader title="User Accounts" onRefresh={loadLists} count={filteredUserAccounts.length} />
+    <div className="mt-3 h-px w-full bg-zinc-800/50" />
+    <div className="mt-4 flex-1 overflow-auto" aria-live="polite" aria-busy={listsLoading}>
       {listsError ? (
         <p className="text-sm text-rose-400">{listsError}</p>
       ) : (
         <>
           {listsLoading && filteredUserAccounts.length === 0 ? (
-            <ul className="space-y-2">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <li key={`s-u-${i}`} className="animate-pulse rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2">
-                  <div className="h-4 w-32 rounded bg-white/10" />
+            <div className="space-y-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={`s-u-${i}`} className="animate-pulse rounded-lg border border-zinc-800/50 bg-zinc-800/30 p-3">
+                  <div className="h-4 w-32 rounded bg-zinc-700/50" />
                   <div className="mt-2 flex items-center gap-2">
-                    <div className="h-3 w-16 rounded bg-white/10" />
-                    <div className="h-3 w-24 rounded bg-white/10" />
-                    <div className="h-3 w-20 rounded bg-white/10" />
+                    <div className="h-3 w-16 rounded bg-zinc-700/50" />
+                    <div className="h-3 w-24 rounded bg-zinc-700/50" />
                   </div>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           ) : filteredUserAccounts.length === 0 ? (
-            <p className="text-sm text-zinc-400">Tidak ada data yang cocok.</p>
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <Users className="h-12 w-12 text-zinc-600 mb-2" />
+              <p className="text-sm text-zinc-400">No user accounts found</p>
+            </div>
           ) : (
-            <ul className="space-y-2">
+            <div className="space-y-2">
               {filteredUserAccounts.map((it, idx) => (
-                <li
+                <div
                   key={`${it.name || "user"}-${idx}`}
-                  className={`group flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 transition-colors hover:bg-white/[0.06] ${it.online ? "ring-1 ring-inset ring-emerald-500/20" : "ring-1 ring-inset ring-rose-500/20"}`}
+                  className={`group rounded-lg border p-3 transition-all duration-200 hover:bg-zinc-800/40 ${
+                    it.online 
+                      ? "border-emerald-500/30 bg-emerald-500/5" 
+                      : "border-zinc-800/50 bg-zinc-800/20"
+                  }`}
                 >
-                  <div className="min-w-0">
+                  <div className="flex items-start justify-between">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="truncate font-semibold text-white">{it.name || "-"}</span>
+                      </div>
+                      <div className="mt-1 text-xs text-zinc-400">
+                        <span className={`inline-flex items-center gap-1 ${it.status === "logged-in" ? "text-emerald-400" : "text-zinc-300"}`}>
+                          <StatusDot online={!!it.online} />
+                          {it.status || "-"}
+                        </span>
+                        <span className="mx-2 text-zinc-600">•</span>
+                        <span>{formatDate(it.signedInAt)}</span>
+                        {it.lastSeenAt && (
+                          <>
+                            <span className="mx-2 text-zinc-600">•</span>
+                            <span>Last: {formatDate(it.lastSeenAt)}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
                     <div className="flex items-center gap-2">
-                      <span className="truncate text-sm font-semibold text-white/95">{it.name || "-"}</span>
-                    </div>
-                    <div className="mt-0.5 text-[12px] text-zinc-400">
-                      <span className="text-zinc-500">Status:</span>
-                      <span className={`ml-1 font-medium ${it.status === "logged-in" ? "text-emerald-400" : "text-zinc-300"}`}>{it.status || "-"}</span>
-                      <span className="mx-2">•</span>
-                      <span className="text-zinc-500">Masuk:</span> <span>{formatDate(it.signedInAt)}</span>
-                      {it.lastSeenAt && (
-                        <>
-                          <span className="mx-2">•</span>
-                          <span className="text-zinc-500">Aktif:</span> <span>{formatDate(it.lastSeenAt)}</span>
-                        </>
-                      )}
+                      <span className={`text-xs font-medium ${it.online ? "text-emerald-400" : "text-zinc-400"}`}>
+                        {it.online ? "Online" : "Offline"}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setDeleteCandidate(it.name || "")}
+                        disabled={deleting}
+                        aria-disabled={deleting}
+                        className="rounded-md border border-zinc-700/50 bg-zinc-800/50 px-2 py-1 text-zinc-300 transition-colors hover:bg-red-900/20 hover:border-red-700/50 hover:text-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                        aria-label={`Delete ${it.name}`}
+                        title="Delete account"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
                     </div>
                   </div>
-                  <div className="ml-3 flex shrink-0 items-center gap-2">
-                    <StatusDot online={!!it.online} />
-                    <span className="text-xs text-zinc-400">{it.online ? "Online" : "Offline"}</span>
-                    <button
-                      type="button"
-                      onClick={() => setDeleteCandidate(it.name || "")}
-                      disabled={deleting}
-                      aria-disabled={deleting}
-                      className="ml-2 inline-flex items-center rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-xs text-zinc-200 transition-colors hover:bg-white/[0.1] disabled:opacity-50 disabled:cursor-not-allowed"
-                      aria-label={`Hapus ${it.name}`}
-                      title="Hapus akun"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
         </>
       )}
@@ -551,22 +570,20 @@ const UserList: React.FC = () => (
 );
 
 return (
-  <section aria-labelledby="akun-heading" className="relative w-full px-4 py-6 overflow-hidden">
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
-      <div className="absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-rose-500/20 blur-3xl" />
-      <div className="absolute bottom-0 right-0 h-72 w-72 translate-x-1/3 translate-y-1/3 rounded-full bg-emerald-500/10 blur-3xl" />
-    </div>
-    <div className="mx-auto w-full max-w-6xl space-y-4">
-      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+  <div className="bg-zinc-950 p-4 md:p-6 min-h-full">
+    <div className="mx-auto max-w-7xl space-y-4">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 id="akun-heading" className="text-xl md:text-2xl font-semibold tracking-tight text-white">Akun</h1>
-          <p className="text-sm text-zinc-400">Kelola sesi admin dan pantau akun aktif.</p>
+          <h1 className="text-2xl font-bold text-white">Account Management</h1>
+          <p className="text-sm text-zinc-400 mt-1">Manage admin sessions and monitor active accounts</p>
         </div>
         {profile && (
-          <span className="inline-flex items-center gap-2 self-start rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-300 md:self-auto">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
-            {adminOnline + userOnline} online
-          </span>
+          <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2">
+            <div className="h-2 w-2 rounded-full bg-emerald-400" />
+            <span className="text-sm font-medium text-emerald-300">
+              {adminOnline + userOnline} users online
+            </span>
+          </div>
         )}
       </div>
 
@@ -578,7 +595,7 @@ return (
             title="Total Online"
             value={adminOnline + userOnline}
             icon={<Clock className="h-4 w-4" />}
-            hint={lastRefreshedAt ? `Diperbarui ${formatTime(lastRefreshedAt)}` : undefined}
+            hint={lastRefreshedAt ? `Updated ${formatTime(lastRefreshedAt)}` : undefined}
             tone="zinc"
           />
         </div>
@@ -586,60 +603,68 @@ return (
 
       {profile && (
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-2 rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1.5">
-            <Search className="h-4 w-4 text-zinc-400" />
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
             <input
-              aria-label="Cari akun"
-              className="w-full md:w-64 bg-transparent text-sm text-zinc-200 placeholder-zinc-500 outline-none"
-              placeholder="Cari nama..."
+              aria-label="Search accounts"
+              className="w-full md:w-80 rounded-lg border border-zinc-800/50 bg-zinc-900/50 pl-10 pr-4 py-2.5 text-sm text-zinc-200 placeholder-zinc-500 backdrop-blur-sm outline-none transition-colors focus:border-blue-500/50 focus:bg-zinc-900/80"
+              placeholder="Search by name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <button
               role="switch"
               aria-checked={onlineOnly}
               onClick={() => setOnlineOnly((v) => !v)}
-              className={`inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors ${onlineOnly ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200" : "border-white/10 bg-white/[0.04] text-zinc-200 hover:bg-white/[0.07]"}`}
+              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all ${
+                onlineOnly 
+                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" 
+                  : "border-zinc-800/50 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800/50"
+              }`}
             >
-              <span className={`h-2.5 w-2.5 rounded-full ${onlineOnly ? "bg-emerald-400" : "bg-zinc-500"}`} />
-              Online saja
+              <div className={`h-2 w-2 rounded-full ${onlineOnly ? "bg-emerald-400" : "bg-zinc-500"}`} />
+              Online only
             </button>
             <button
               type="button"
               onClick={loadLists}
-              className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm text-zinc-200 transition-colors hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+              className="inline-flex items-center gap-2 rounded-lg border border-zinc-800/50 bg-zinc-900/50 px-3 py-2.5 text-sm font-medium text-zinc-300 backdrop-blur-sm transition-colors hover:bg-zinc-800/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
             >
               <RefreshCw className={`h-4 w-4 ${listsLoading ? "animate-spin" : ""}`} />
-              <span>Refresh</span>
+              Refresh
             </button>
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
-        <div className="md:col-span-1 flex items-start justify-center">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-1">
           {!profile ? (
-            <div className="relative w-full max-w-[420px] overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(to_bottom,#0b0b0c,#0a0a0a)] p-6 shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
-              <div className="pointer-events-none absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+            <div className="w-full max-w-md mx-auto rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm p-6">
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-white">Admin Login</h2>
+                <p className="text-sm text-zinc-400 mt-1">Access the monitoring dashboard</p>
+              </div>
+
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
                   if (canSubmit) handleLogin();
                 }}
+                className="space-y-4"
               >
-                <h2 className="text-[20px] md:text-[22px] font-semibold tracking-tight text-white/95">Masuk</h2>
-                <p className="mt-1.5 text-[13px] text-zinc-400">Univista Monitoring ~ Masuk untuk melanjutkan.</p>
-
-                <div className="mt-4">
-                  <label className="mb-1 block text-[11px] uppercase tracking-wide text-zinc-400">ID Login</label>
+                <div>
+                  <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2">
+                    Login ID
+                  </label>
                   <div className="relative">
-                    <User className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-zinc-400" />
+                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
                     <input
                       type="text"
-                      placeholder="ID Login"
-                      className="h-11 w-full rounded-md border border-white/10 bg-white/[0.03] pl-10 pr-3 text-sm text-zinc-200 placeholder-zinc-600 outline-none focus:border-white/20 focus:ring-2 focus:ring-white/10 transition"
+                      placeholder="Enter login ID"
+                      className="w-full rounded-lg border border-zinc-800/50 bg-zinc-900/80 pl-10 pr-4 py-2.5 text-sm text-zinc-200 placeholder-zinc-500 outline-none transition-colors focus:border-blue-500/50 focus:bg-zinc-900"
                       value={loginId}
                       onChange={(e) => setLoginId(e.target.value.toUpperCase())}
                       onKeyDown={(e) => { if (e.key === "Enter" && canSubmit) handleLogin(); }}
@@ -648,14 +673,16 @@ return (
                   </div>
                 </div>
 
-                <div className="mt-4">
-                  <label className="mb-1 block text-[11px] uppercase tracking-wide text-zinc-400">Nama Admin</label>
+                <div>
+                  <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2">
+                    Admin Name
+                  </label>
                   <div className="relative">
-                    <User className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-zinc-400" />
+                    <UserCheck className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
                     <input
                       type="text"
-                      placeholder="Nama Admin"
-                      className="h-11 w-full rounded-md border border-white/10 bg-white/[0.03] pl-10 pr-3 text-sm text-zinc-200 placeholder-zinc-600 outline-none focus:border-white/20 focus:ring-2 focus:ring-white/10 transition"
+                      placeholder="Enter admin name"
+                      className="w-full rounded-lg border border-zinc-800/50 bg-zinc-900/80 pl-10 pr-4 py-2.5 text-sm text-zinc-200 placeholder-zinc-500 outline-none transition-colors focus:border-blue-500/50 focus:bg-zinc-900"
                       value={adminName}
                       onChange={(e) => setAdminName(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter" && canSubmit) handleLogin(); }}
@@ -664,13 +691,15 @@ return (
                   </div>
                 </div>
 
-                <div className="mt-4">
-                  <label className="mb-1 block text-[11px] uppercase tracking-wide text-zinc-400">Kata Sandi</label>
+                <div>
+                  <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2">
+                    Password
+                  </label>
                   <div className="relative">
                     <input
                       type={showPassword ? "text" : "password"}
-                      placeholder="Kata Sandi khusus Admin"
-                      className="h-11 w-full rounded-md border border-white/10 bg-white/[0.03] px-3 pr-10 text-sm text-zinc-200 placeholder-zinc-600 outline-none focus:border-white/20 focus:ring-2 focus:ring-white/10 transition"
+                      placeholder="Enter admin password"
+                      className="w-full rounded-lg border border-zinc-800/50 bg-zinc-900/80 pl-4 pr-12 py-2.5 text-sm text-zinc-200 placeholder-zinc-500 outline-none transition-colors focus:border-blue-500/50 focus:bg-zinc-900"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter" && canSubmit) handleLogin(); }}
@@ -678,14 +707,10 @@ return (
                     <button
                       type="button"
                       onClick={() => setShowPassword((v) => !v)}
-                      className="absolute right-2 top-2.5 rounded-md p-1.5 text-zinc-400 hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
-                      aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
                     >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
                 </div>
@@ -693,55 +718,70 @@ return (
                 <button
                   type="submit"
                   disabled={!canSubmit}
-                  className={`mt-5 flex h-11 w-full items-center justify-center rounded-lg border transition ${
+                  className={`w-full flex items-center justify-center gap-2 rounded-lg py-2.5 px-4 text-sm font-medium transition-all ${
                     canSubmit
-                      ? "border-white/10 bg-white text-black hover:bg-white/90"
-                      : "cursor-not-allowed opacity-60 border-white/10 bg-white/60 text-black"
+                      ? "bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      : "bg-zinc-700 text-zinc-400 cursor-not-allowed"
                   }`}
                 >
-                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogIn className="mr-2 h-4 w-4" />}
-                  <span className="text-[15px] font-semibold">{loading ? "Sedang masuk..." : "Masuk"}</span>
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <LogIn className="h-4 w-4" />
+                  )}
+                  {loading ? "Signing in..." : "Sign In"}
                 </button>
               </form>
             </div>
           ) : (
-            <div className="relative w-full max-w-[420px] overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(to_bottom,#0b0b0c,#0a0a0a)] p-6 shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
-              <div className="pointer-events-none absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-              <h2 className="text-[20px] md:text-[22px] font-semibold tracking-tight text-white/95">Profil</h2>
-              <div className="my-3 h-px w-full bg-white/10" />
-              <div className="flex items-center gap-3 py-1.5">
-                <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-rose-500/30 to-amber-500/30 text-white text-sm font-semibold">
-                  {(profile.adminName?.[0] || "A").toUpperCase()}
+            <div className="w-full max-w-md mx-auto rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm p-6">
+              <div className="mb-4">
+                <h2 className="text-xl font-bold text-white">Admin Profile</h2>
+                <p className="text-sm text-zinc-400 mt-1">Currently logged in</p>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-lg">
+                    {(profile.adminName?.[0] || "A").toUpperCase()}
+                  </div>
+                  <div>
+                    <div className="font-semibold text-white">{profile.adminName}</div>
+                    <div className="text-xs text-zinc-400">Administrator</div>
+                  </div>
                 </div>
-                <div className="text-xs text-zinc-400">Administrator</div>
-              </div>
-              <div className="flex items-center justify-between py-2">
-                <span className="text-sm text-zinc-400">Nama Admin</span>
-                <span className="text-sm font-semibold text-white/95">{profile.adminName}</span>
-              </div>
-              <div className="flex items-center justify-between py-2">
-                <span className="text-sm text-zinc-400">ID Login</span>
-                <span className="text-sm font-semibold text-white/95">{profile.loginId}</span>
-              </div>
-              <div className="flex items-center justify-between py-2">
-                <span className="text-sm text-zinc-400">Terakhir Masuk</span>
-                <span className="text-sm font-semibold text-white/95">{formatDate(profile.signedInAt)}</span>
-              </div>
 
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="mt-5 flex h-11 w-full items-center justify-center rounded-lg border border-rose-900/60 bg-rose-900/40 text-white transition hover:bg-rose-900/60"
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                <span className="text-[15px] font-semibold">{loading ? "Sedang keluar..." : "Keluar"}</span>
-              </button>
+                <div className="space-y-3 pt-2">
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-sm text-zinc-400">Login ID</span>
+                    <span className="text-sm font-medium text-white">{profile.loginId}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-sm text-zinc-400">Last Login</span>
+                    <span className="text-sm font-medium text-white">{formatDate(profile.signedInAt)}</span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-2 rounded-lg border border-red-700/50 bg-red-900/20 py-2.5 px-4 text-sm font-medium text-red-300 transition-colors hover:bg-red-900/30 disabled:opacity-50"
+                >
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <LogOut className="h-4 w-4" />
+                  )}
+                  {loading ? "Signing out..." : "Sign Out"}
+                </button>
+              </div>
             </div>
           )}
         </div>
 
         {profile && (
-          <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 md:h-full md:min-h-0">
+          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[400px]">
             <AdminList />
             <UserList />
           </div>
@@ -755,13 +795,13 @@ return (
       />
       <ConfirmDeleteModal
         visible={!!deleteCandidate}
-        title="Hapus Akun User?"
-        description={`Apakah Anda yakin ingin menghapus \"${deleteCandidate || ""}\" dari daftar?`}
-        confirmLabel={deleting ? "Menghapus..." : "Hapus"}
+        title="Delete User Account?"
+        description={`Are you sure you want to delete "${deleteCandidate || ""}" from the list?`}
+        confirmLabel={deleting ? "Deleting..." : "Delete"}
         onConfirm={() => deleteCandidate && deleteUser(deleteCandidate)}
         onClose={() => !deleting && setDeleteCandidate(null)}
       />
     </div>
-  </section>
+  </div>
 );
 }
