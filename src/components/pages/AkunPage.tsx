@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Eye, EyeOff, LogIn, LogOut, User } from "lucide-react";
+import { ENDPOINTS } from "@/components/config/server";
 import WrongPassModal from "@/components/modals/WrongPassModal";
 
 type Profile = {
-  name: string;
+  loginId: string;
+  adminName: string;
   signedInAt: string;
 };
 
@@ -38,7 +40,8 @@ function formatDate(s?: string) {
 }
 
 export default function AkunPage() {
-  const [name, setName] = useState("");
+  const [loginId, setLoginId] = useState("UNIVISTA");
+  const [adminName, setAdminName] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -46,39 +49,191 @@ export default function AkunPage() {
   const [wrongVisible, setWrongVisible] = useState(false);
   const [wrongMessage, setWrongMessage] = useState<string | undefined>(undefined);
 
+  const STORAGE_KEY = "@akun/profile";
+  const TOKEN_COOKIE = "uv_token";
+  const hbRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const profileRef = useRef<Profile | null>(null);
+
   const canSubmit = useMemo(
-    () => name.trim().length > 0 && password.length > 0 && !loading,
-    [name, password, loading]
+    () => loginId.trim().length > 0 && adminName.trim().length > 0 && password.length > 0 && !loading,
+    [loginId, adminName, password, loading]
   );
 
-  const handleLogin = () => {
-    if (!canSubmit) return;
-    setLoading(true);
-    setTimeout(() => {
-      // Mocked validation: treat as wrong unless password matches demo key
-      const isValid = password.trim() === "admin";
-      if (!isValid) {
-        setWrongMessage("Kata sandi admin tidak sesuai. Silakan coba lagi.");
-        setWrongVisible(true);
-        setPassword("");
-        setLoading(false);
-        return;
-      }
-      const iso = new Date().toISOString();
-      setProfile({ name: name.trim(), signedInAt: iso });
-      setLoading(false);
-    }, 500);
+  // Cookie helpers
+  const setCookie = (k: string, v: string, maxAgeSec: number) => {
+    try {
+      document.cookie = `${k}=${v}; Max-Age=${maxAgeSec}; Path=/; SameSite=Lax`;
+    } catch {}
+  };
+  const getCookie = (k: string) => {
+    try {
+      return document.cookie
+        .split(";")
+        .map((c) => c.trim())
+        .find((c) => c.startsWith(`${k}=`))
+        ?.split("=")[1];
+    } catch {
+      return undefined;
+    }
+  };
+  const deleteCookie = (k: string) => {
+    try {
+      document.cookie = `${k}=; Max-Age=0; Path=/; SameSite=Lax`;
+    } catch {}
   };
 
-  const handleLogout = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setProfile(null);
-      setName("");
-      setPassword("");
-      setLoading(false);
-    }, 300);
+  // Presence helpers
+  const sendPresence = async (status: "online" | "offline") => {
+    try {
+      if (!profile?.loginId) return;
+      await fetch(ENDPOINTS.logininfo, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: profile.loginId, status }),
+      });
+    } catch {}
   };
+
+  const startHeartbeat = () => {
+    if (hbRef.current) return;
+    sendPresence("online");
+    hbRef.current = setInterval(() => sendPresence("online"), 30_000);
+  };
+  const stopHeartbeat = (sendOffline?: boolean) => {
+    if (hbRef.current) {
+      clearInterval(hbRef.current);
+      hbRef.current = null;
+    }
+    if (sendOffline && profile?.loginId) {
+      try {
+        // Best-effort on unload
+        const payload = new Blob([JSON.stringify({ name: profile.loginId, status: "offline" })], { type: "application/json" });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(ENDPOINTS.logininfo, payload);
+          return;
+        }
+      } catch {}
+      // Fallback
+      sendPresence("offline");
+    }
+  };
+
+  const handleLogin = async () => {
+    if (!canSubmit) return;
+    setLoading(true);
+    try {
+      const res = await fetch(ENDPOINTS.login, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: loginId.trim(), adminName: adminName.trim(), password, status: "login" }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.ok) {
+        if (res.status === 401 || data?.error === "Invalid credentials") {
+          setWrongMessage("Kata sandi admin tidak sesuai. Silakan coba lagi.");
+          setWrongVisible(true);
+          setPassword("");
+          return;
+        }
+        throw new Error(data?.error || "Login failed");
+      }
+
+      // Get Jakarta time for consistent signed-in timestamp
+      const tRes = await fetch(ENDPOINTS.time);
+      const tData = await tRes.json();
+      const iso = tData?.iso || new Date().toISOString();
+
+      // Persist profile and token
+      const token: string | undefined = data?.token;
+      if (token) setCookie(TOKEN_COOKIE, token, 7 * 24 * 60 * 60);
+      const prof: Profile = { loginId: loginId.trim(), adminName: adminName.trim(), signedInAt: iso };
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(prof)); } catch {}
+      setProfile(prof);
+      startHeartbeat();
+      await sendPresence("online");
+    } catch (err: any) {
+      setWrongMessage(err?.message || "Tidak dapat masuk. Coba lagi.");
+      setWrongVisible(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    if (!profile) return;
+    setLoading(true);
+    try {
+      stopHeartbeat(true);
+      await fetch(ENDPOINTS.logout, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: profile.loginId, status: "logout" }),
+      });
+    } catch {}
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    deleteCookie(TOKEN_COOKIE);
+    setProfile(null);
+    setLoginId("UNIVISTA");
+    setAdminName("");
+    setPassword("");
+    setLoading(false);
+  };
+
+  // Restore persisted profile and keep presence online
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const token = getCookie(TOKEN_COOKIE);
+      if (raw && token) {
+        const parsedAny = JSON.parse(raw) as any;
+        let parsed: Profile | null = null;
+        if (parsedAny && typeof parsedAny === "object") {
+          if (parsedAny.loginId && parsedAny.adminName) {
+            parsed = parsedAny as Profile;
+          } else if (parsedAny.name) {
+            // migrate older schema where 'name' was used
+            parsed = { loginId: "UNIVISTA", adminName: String(parsedAny.name), signedInAt: parsedAny.signedInAt || new Date().toISOString() };
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed)); } catch {}
+          }
+        }
+        if (parsed) {
+          setProfile(parsed);
+          startHeartbeat();
+          sendPresence("online");
+        }
+      }
+    } catch {}
+    // visibility events to periodically reaffirm online
+    const onVis = () => { if (document.visibilityState === "visible" && profileRef.current) sendPresence("online"); };
+    const onHide = () => { if (profileRef.current) stopHeartbeat(true); };
+    const onShow = () => { if (profileRef.current) { startHeartbeat(); sendPresence("online"); } };
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("pagehide", onHide);
+    window.addEventListener("beforeunload", onHide);
+    window.addEventListener("pageshow", onShow);
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("pagehide", onHide);
+      window.removeEventListener("beforeunload", onHide);
+      window.removeEventListener("pageshow", onShow);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Manage heartbeat lifecycle when profile changes
+  useEffect(() => {
+    if (profile) {
+      startHeartbeat();
+      return () => stopHeartbeat(true);
+    } else {
+      stopHeartbeat();
+    }
+  }, [profile]);
+
+  // Keep latest profile in a ref to avoid stale closures in event handlers
+  useEffect(() => {
+    profileRef.current = profile;
+  }, [profile]);
 
   return (
     <section className="flex w-full min-h-[calc(100dvh-80px)] md:min-h-[100dvh] items-center justify-center px-4">
@@ -93,10 +248,22 @@ export default function AkunPage() {
             <User className="absolute left-3 top-3.5 h-4 w-4 text-zinc-400" />
             <input
               type="text"
-              placeholder="Nama"
+              placeholder="ID Login"
               className="h-11 w-full rounded-lg border border-[#27272a] bg-[#0f0f10] pl-10 pr-3 text-sm text-[#e5e7eb] placeholder-[#71717a] outline-none ring-0 focus:border-[#3f3f46]"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={loginId}
+              onChange={(e) => setLoginId(e.target.value.toUpperCase())}
+              autoComplete="off"
+            />
+          </div>
+
+          <div className="relative mt-4">
+            <User className="absolute left-3 top-3.5 h-4 w-4 text-zinc-400" />
+            <input
+              type="text"
+              placeholder="Nama Admin"
+              className="h-11 w-full rounded-lg border border-[#27272a] bg-[#0f0f10] pl-10 pr-3 text-sm text-[#e5e7eb] placeholder-[#71717a] outline-none ring-0 focus:border-[#3f3f46]"
+              value={adminName}
+              onChange={(e) => setAdminName(e.target.value)}
               autoComplete="off"
             />
           </div>
@@ -142,8 +309,12 @@ export default function AkunPage() {
           <h1 className="text-[22px] font-bold text-[#fafafa]">Profil</h1>
           <div className="my-3 h-px w-full bg-[#1f1f1f]" />
           <div className="flex items-center justify-between py-2">
-            <span className="text-sm text-[#a1a1aa]">Nama</span>
-            <span className="text-sm font-semibold text-[#e5e7eb]">{profile.name}</span>
+            <span className="text-sm text-[#a1a1aa]">Nama Admin</span>
+            <span className="text-sm font-semibold text-[#e5e7eb]">{profile.adminName}</span>
+          </div>
+          <div className="flex items-center justify-between py-2">
+            <span className="text-sm text-[#a1a1aa]">ID Login</span>
+            <span className="text-sm font-semibold text-[#e5e7eb]">{profile.loginId}</span>
           </div>
           <div className="flex items-center justify-between py-2">
             <span className="text-sm text-[#a1a1aa]">Terakhir Masuk</span>
