@@ -665,7 +665,7 @@ return (
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <div className="flex items-center gap-3 overflow-x-auto md:overflow-visible whitespace-nowrap w-full uv-scrollbar uv-scrollbar--thin -mx-2 px-2">
+          <div className="flex items-center gap-3 overflow-x-auto md:overflow-visible whitespace-nowrap w-full md:w-auto uv-scrollbar uv-scrollbar--thin -mx-2 px-2">
             <button
               role="switch"
               aria-checked={onlyMine}
