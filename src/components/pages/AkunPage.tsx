@@ -149,7 +149,9 @@ export default function AkunPage() {
     const currentClientId = clientIdRef.current || getClientId();
     const filtered = adminAccounts.filter((it) => {
       const matchesSearch = !q || it.adminName?.toLowerCase().includes(q) || it.name?.toLowerCase().includes(q);
-      const isCurrent = it.clientId === currentClientId;
+      const isCurrent =
+        it.clientId === currentClientId ||
+        (!!profile && it.name === profile.loginId && it.adminName === profile.adminName);
       // If onlyMine is on, ignore online/status filters and show all 'Anda' (current) entries
       if (onlyMine) {
         return isCurrent;
@@ -161,8 +163,8 @@ export default function AkunPage() {
     
     // Sort to put current user's account at the top, then by online status, then by recent activity
     return filtered.sort((a, b) => {
-      const aIsCurrent = a.clientId === currentClientId;
-      const bIsCurrent = b.clientId === currentClientId;
+      const aIsCurrent = a.clientId === currentClientId || (!!profile && a.name === profile.loginId && a.adminName === profile.adminName);
+      const bIsCurrent = b.clientId === currentClientId || (!!profile && b.name === profile.loginId && b.adminName === profile.adminName);
       
       // Priority 1: Current user's account always at top
       if (aIsCurrent && !bIsCurrent) return -1;
