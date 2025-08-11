@@ -663,101 +663,103 @@ return (
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-1">
-          {!profile ? (
-            <div className="w-full max-w-md mx-auto rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm p-6">
-              <div className="mb-6">
-                <h2 className="text-xl font-bold text-white">Login Admin</h2>
-                <p className="text-sm text-zinc-400 mt-1">Akses dashboard monitoring</p>
+      {!profile ? (
+        <div className="flex justify-center">
+          <div className="w-full max-w-md rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm p-6">
+            <div className="mb-6">
+              <h2 className="text-xl font-bold text-white">Login Admin</h2>
+              <p className="text-sm text-zinc-400 mt-1">Akses dashboard monitoring</p>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (canSubmit) handleLogin();
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2">
+                  ID Login
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                  <input
+                    type="text"
+                    placeholder="Masukkan ID login"
+                    className="w-full rounded-lg border border-zinc-800/50 bg-zinc-900/80 pl-10 pr-4 py-2.5 text-sm text-zinc-200 placeholder-zinc-500 outline-none transition-colors focus:border-blue-500/50 focus:bg-zinc-900"
+                    value={loginId}
+                    onChange={(e) => setLoginId(e.target.value.toUpperCase())}
+                    onKeyDown={(e) => { if (e.key === "Enter" && canSubmit) handleLogin(); }}
+                    autoComplete="off"
+                  />
+                </div>
               </div>
 
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (canSubmit) handleLogin();
-                }}
-                className="space-y-4"
+              <div>
+                <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2">
+                  Nama Admin
+                </label>
+                <div className="relative">
+                  <UserCheck className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                  <input
+                    type="text"
+                    placeholder="Masukkan nama admin"
+                    className="w-full rounded-lg border border-zinc-800/50 bg-zinc-900/80 pl-10 pr-4 py-2.5 text-sm text-zinc-200 placeholder-zinc-500 outline-none transition-colors focus:border-blue-500/50 focus:bg-zinc-900"
+                    value={adminName}
+                    onChange={(e) => setAdminName(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter" && canSubmit) handleLogin(); }}
+                    autoComplete="off"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2">
+                  Kata Sandi
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Masukkan kata sandi admin"
+                    className="w-full rounded-lg border border-zinc-800/50 bg-zinc-900/80 pl-4 pr-12 py-2.5 text-sm text-zinc-200 placeholder-zinc-500 outline-none transition-colors focus:border-blue-500/50 focus:bg-zinc-900"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter" && canSubmit) handleLogin(); }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
+                    aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={!canSubmit}
+                className={`w-full flex items-center justify-center gap-2 rounded-lg py-2.5 px-4 text-sm font-medium transition-all ${
+                  canSubmit
+                    ? "bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    : "bg-zinc-700 text-zinc-400 cursor-not-allowed"
+                }`}
               >
-                <div>
-                  <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2">
-                    ID Login
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-                    <input
-                      type="text"
-                      placeholder="Masukkan ID login"
-                      className="w-full rounded-lg border border-zinc-800/50 bg-zinc-900/80 pl-10 pr-4 py-2.5 text-sm text-zinc-200 placeholder-zinc-500 outline-none transition-colors focus:border-blue-500/50 focus:bg-zinc-900"
-                      value={loginId}
-                      onChange={(e) => setLoginId(e.target.value.toUpperCase())}
-                      onKeyDown={(e) => { if (e.key === "Enter" && canSubmit) handleLogin(); }}
-                      autoComplete="off"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2">
-                    Nama Admin
-                  </label>
-                  <div className="relative">
-                    <UserCheck className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-                    <input
-                      type="text"
-                      placeholder="Masukkan nama admin"
-                      className="w-full rounded-lg border border-zinc-800/50 bg-zinc-900/80 pl-10 pr-4 py-2.5 text-sm text-zinc-200 placeholder-zinc-500 outline-none transition-colors focus:border-blue-500/50 focus:bg-zinc-900"
-                      value={adminName}
-                      onChange={(e) => setAdminName(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter" && canSubmit) handleLogin(); }}
-                      autoComplete="off"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2">
-                    Kata Sandi
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Masukkan kata sandi admin"
-                      className="w-full rounded-lg border border-zinc-800/50 bg-zinc-900/80 pl-4 pr-12 py-2.5 text-sm text-zinc-200 placeholder-zinc-500 outline-none transition-colors focus:border-blue-500/50 focus:bg-zinc-900"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter" && canSubmit) handleLogin(); }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
-                      aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={!canSubmit}
-                  className={`w-full flex items-center justify-center gap-2 rounded-lg py-2.5 px-4 text-sm font-medium transition-all ${
-                    canSubmit
-                      ? "bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                      : "bg-zinc-700 text-zinc-400 cursor-not-allowed"
-                  }`}
-                >
-                  {loading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <LogIn className="h-4 w-4" />
-                  )}
-                  {loading ? "Sedang masuk..." : "Masuk"}
-                </button>
-              </form>
-            </div>
-          ) : (
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <LogIn className="h-4 w-4" />
+                )}
+                {loading ? "Sedang masuk..." : "Masuk"}
+              </button>
+            </form>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-1">
             <div className="w-full max-w-md mx-auto rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm p-6">
               <div className="mb-4">
                 <h2 className="text-xl font-bold text-white">Profil Admin</h2>
@@ -801,16 +803,14 @@ return (
                 </button>
               </div>
             </div>
-          )}
-        </div>
+          </div>
 
-        {profile && (
           <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[400px]">
             <AdminList />
             <UserList />
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <WrongPassModal
         visible={wrongVisible}
