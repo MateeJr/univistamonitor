@@ -53,6 +53,23 @@ export default function AkunPage() {
   const TOKEN_COOKIE = "uv_token";
   const hbRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const profileRef = useRef<Profile | null>(null);
+  const clientIdRef = useRef<string | null>(null);
+
+  const CLIENT_ID_KEY = "@akun/client-id";
+  const getClientId = (): string => {
+    try {
+      let id: string = localStorage.getItem(CLIENT_ID_KEY) || "";
+      if (!id) {
+        // Prefer crypto.randomUUID when available
+        const hasCrypto = typeof crypto !== "undefined" && (crypto as any).randomUUID;
+        id = hasCrypto ? (crypto as any).randomUUID() : `web-${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
+        localStorage.setItem(CLIENT_ID_KEY, id);
+      }
+      return id;
+    } catch {
+      return `web-${Date.now().toString(36)}`;
+    }
+  };
 
   const canSubmit = useMemo(
     () => loginId.trim().length > 0 && adminName.trim().length > 0 && password.length > 0 && !loading,
@@ -86,10 +103,11 @@ export default function AkunPage() {
   const sendPresence = async (status: "online" | "offline") => {
     try {
       if (!profile?.loginId) return;
+      const cid = clientIdRef.current || getClientId();
       await fetch(ENDPOINTS.logininfo, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: profile.loginId, status }),
+        body: JSON.stringify({ name: profile.loginId, status, clientId: cid }),
       });
     } catch {}
   };
@@ -107,7 +125,8 @@ export default function AkunPage() {
     if (sendOffline && profile?.loginId) {
       try {
         // Best-effort on unload
-        const payload = new Blob([JSON.stringify({ name: profile.loginId, status: "offline" })], { type: "application/json" });
+        const cid = clientIdRef.current || getClientId();
+        const payload = new Blob([JSON.stringify({ name: profile.loginId, status: "offline", clientId: cid })], { type: "application/json" });
         if (navigator.sendBeacon) {
           navigator.sendBeacon(ENDPOINTS.logininfo, payload);
           return;
@@ -125,7 +144,7 @@ export default function AkunPage() {
       const res = await fetch(ENDPOINTS.login, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: loginId.trim(), adminName: adminName.trim(), password, status: "login" }),
+        body: JSON.stringify({ name: loginId.trim(), adminName: adminName.trim(), password, status: "login", clientId: clientIdRef.current || getClientId() }),
       });
       const data = await res.json();
       if (!res.ok || !data?.ok) {
@@ -167,7 +186,7 @@ export default function AkunPage() {
       await fetch(ENDPOINTS.logout, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: profile.loginId, status: "logout" }),
+        body: JSON.stringify({ name: profile.loginId, status: "logout", clientId: clientIdRef.current || getClientId() }),
       });
     } catch {}
     try { localStorage.removeItem(STORAGE_KEY); } catch {}
@@ -182,6 +201,7 @@ export default function AkunPage() {
   // Restore persisted profile and keep presence online
   useEffect(() => {
     try {
+      clientIdRef.current = getClientId();
       const raw = localStorage.getItem(STORAGE_KEY);
       const token = getCookie(TOKEN_COOKIE);
       if (raw && token) {
