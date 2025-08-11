@@ -17,17 +17,13 @@ const TABS: Array<{ key: TabKey; label: string; Icon: any; href: string }> = [
 export default function NavBar() {
   const pathname = usePathname() || "/";
   return (
-    <div className="fixed inset-y-0 left-0 z-50 w-[80px]">
+    <div className="fixed z-50 inset-x-0 top-0 w-full md:top-0 md:left-0 md:right-auto md:w-[80px]">
       <div
-        className="relative flex h-full w-full flex-col items-center justify-start border-r border-[#1a1a1a] bg-black/90 backdrop-blur-md"
-        style={{
-          paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)",
-          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)",
-          boxShadow: "6px 0 24px rgba(0,0,0,0.45)",
-        }}
+        className="relative flex w-full h-[72px] md:h-full md:w-full flex-row md:flex-col items-center md:items-center justify-around md:justify-start border-b md:border-b-0 md:border-r border-[#1a1a1a] bg-black/90 backdrop-blur-md shadow-[0_6px_24px_rgba(0,0,0,0.45)] md:shadow-[6px_0_24px_rgba(0,0,0,0.45)]"
       >
-        {/* subtle vertical glow line */}
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent" />
+        {/* subtle glow lines */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent md:hidden" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent hidden md:block" />
         {TABS.map(({ key, label, Icon, href }) => {
           const isActive = pathname === href;
           return (
@@ -36,11 +32,14 @@ export default function NavBar() {
               href={href}
               aria-label={label}
               aria-current={isActive ? "page" : undefined}
-              className="group relative flex w-full flex-col items-center py-2 outline-none transition-all duration-200 ease-out hover:bg-white/[0.03] focus-visible:ring-2 focus-visible:ring-white/20"
+              className="group relative flex flex-1 md:flex-none w-auto md:w-full flex-col items-center py-2 outline-none transition-all duration-200 ease-out hover:bg-white/[0.03] focus-visible:ring-2 focus-visible:ring-white/20"
             >
               {/* active indicator bar */}
               {isActive && (
-                <span className="pointer-events-none absolute right-0 top-1/2 h-9 w-1 -translate-y-1/2 rounded-l bg-white/80 shadow-[0_0_12px_rgba(255,255,255,0.6)]" />
+                <span className="pointer-events-none absolute bottom-0 left-1/2 h-1 w-9 -translate-x-1/2 rounded-t bg-white/80 shadow-[0_0_12px_rgba(255,255,255,0.6)] md:hidden" />
+              )}
+              {isActive && (
+                <span className="pointer-events-none absolute right-0 top-1/2 h-9 w-1 -translate-y-1/2 rounded-l bg-white/80 shadow-[0_0_12px_rgba(255,255,255,0.6)] hidden md:block" />
               )}
               {/* hover/active radial glow behind icon */}
               <span
