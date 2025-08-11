@@ -665,12 +665,12 @@ return (
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 overflow-x-auto md:overflow-visible whitespace-nowrap w-full uv-scrollbar uv-scrollbar--thin -mx-2 px-2">
             <button
               role="switch"
               aria-checked={onlyMine}
               onClick={() => setOnlyMine((v) => !v)}
-              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all ${
+              className={`inline-flex items-center gap-2 shrink-0 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all ${
                 onlyMine
                   ? "border-yellow-500/30 bg-yellow-500/10 text-yellow-300"
                   : "border-zinc-800/50 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800/50"
@@ -690,7 +690,7 @@ return (
                   return nv;
                 });
               }}
-              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all ${
+              className={`inline-flex items-center gap-2 shrink-0 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all ${
                 onlyLoggedIn
                   ? "border-blue-500/30 bg-blue-500/10 text-blue-300"
                   : "border-zinc-800/50 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800/50"
@@ -710,7 +710,7 @@ return (
                   return nv;
                 });
               }}
-              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all ${
+              className={`inline-flex items-center gap-2 shrink-0 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all ${
                 onlyLoggedOut
                   ? "border-rose-500/30 bg-rose-500/10 text-rose-300"
                   : "border-zinc-800/50 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800/50"
@@ -724,7 +724,7 @@ return (
               role="switch"
               aria-checked={onlineOnly}
               onClick={() => setOnlineOnly((v) => !v)}
-              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all ${
+              className={`inline-flex items-center gap-2 shrink-0 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all ${
                 onlineOnly 
                   ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" 
                   : "border-zinc-800/50 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800/50"
@@ -736,9 +736,9 @@ return (
             <button
               type="button"
               onClick={loadLists}
-              className="inline-flex items-center gap-2 rounded-lg border border-zinc-800/50 bg-zinc-900/50 px-3 py-2.5 text-sm font-medium text-zinc-300 backdrop-blur-sm transition-colors hover:bg-zinc-800/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              className="inline-flex items-center gap-2 shrink-0 rounded-lg border border-zinc-800/50 bg-zinc-900/50 px-3 py-2.5 text-sm font-medium text-zinc-300 backdrop-blur-sm transition-colors hover:bg-zinc-800/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
             >
-              <RefreshCw className={`h-4 w-4 ${listsLoading ? "animate-spin" : ""}`} />
+              <RefreshCw className={`${listsLoading ? "animate-spin" : ""} h-4 w-4`} />
               Refresh
             </button>
           </div>

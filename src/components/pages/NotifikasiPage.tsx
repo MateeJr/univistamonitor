@@ -1,7 +1,7 @@
 export default function NotifikasiPage() {
   return (
-    <section className="min-h-screen w-full px-4 py-6 sm:px-6 md:py-10">
-      <div className="mx-auto w-full max-w-5xl">
+    <section className="min-h-full w-full px-4 py-6 sm:px-6 md:py-10">
+      <div className="mx-auto w-full max-w-5xl min-h-[calc(100dvh-80px)] md:min-h-[100dvh] flex flex-col">
         <div className="mb-5 flex items-end justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-[#f2f2f2]">Notifikasi</h1>
@@ -10,7 +10,7 @@ export default function NotifikasiPage() {
             </p>
           </div>
         </div>
-        <div className="relative overflow-hidden rounded-xl border border-[#2a2a2a] bg-[#0b0b0b] shadow-2xl">
+        <div className="relative overflow-hidden rounded-xl border border-[#2a2a2a] bg-[#0b0b0b] shadow-2xl flex flex-col h-full">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#3a3a3a] to-transparent" />
           <div className="border-b border-[#1e1e1e] bg-[#0f0f0f] px-4 py-3 sm:px-5">
             <div className="flex items-center text-[11px] font-medium uppercase tracking-wider text-[#9a9a9a]">
@@ -20,7 +20,7 @@ export default function NotifikasiPage() {
               <div className="hidden w-40 shrink-0 lg:block">Waktu</div>
             </div>
           </div>
-          <div className="max-h-[70vh] overflow-auto">
+          <div className="flex-1 overflow-auto">
             {Array.from({ length: 16 }).map((_, i) => (
               <div
                 key={i}
