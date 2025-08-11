@@ -1,8 +1,8 @@
 export default function NotifikasiPage() {
   return (
-    <section className="min-h-full w-full p-4 md:p-6">
-      <div className="mx-auto w-full max-w-5xl flex flex-col">
-        <div className="mb-5 flex items-end justify-between">
+    <section className="w-full p-4 md:p-6 box-border min-h-full flex flex-col">
+      <div className="mx-auto w-full max-w-screen-2xl flex flex-col flex-1 min-h-0">
+        <div className="mb-3 flex items-end justify-between shrink-0">
           <div>
             <h1 className="text-2xl font-semibold text-[#f2f2f2]">Notifikasi</h1>
             <p className="mt-1 text-sm text-[#9a9a9a]">
@@ -10,7 +10,7 @@ export default function NotifikasiPage() {
             </p>
           </div>
         </div>
-        <div className="relative overflow-hidden rounded-xl border border-[#2a2a2a] bg-[#0b0b0b] shadow-2xl flex flex-col">
+        <div className="relative overflow-hidden rounded-xl border border-[#2a2a2a] bg-[#0b0b0b] shadow-2xl flex flex-col flex-none">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#3a3a3a] to-transparent" />
           <div className="border-b border-[#1e1e1e] bg-[#0f0f0f] px-4 py-3 sm:px-5">
             <div className="flex items-center text-[11px] font-medium uppercase tracking-wider text-[#9a9a9a]">
@@ -20,8 +20,8 @@ export default function NotifikasiPage() {
               <div className="hidden w-40 shrink-0 lg:block">Waktu</div>
             </div>
           </div>
-          <div className="overflow-auto max-h-80 md:max-h-96 uv-scrollbar uv-scrollbar--thin overscroll-contain">
-            {Array.from({ length: 16 }).map((_, i) => (
+          <div className="flex-none h-[480px] sm:h-[560px] overflow-auto uv-scrollbar uv-scrollbar--thin overscroll-contain">
+            {Array.from({ length: 40 }).map((_, i) => (
               <div
                 key={i}
                 className={`${i % 2 === 0 ? "bg-[#0e0e0e]" : "bg-[#181818]"} group flex h-12 w-full items-center px-3 transition-colors sm:h-14 sm:px-4`}
