@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0a0a;
+  --foreground: #ededed;
 }
 
 @theme inline {
@@ -12,15 +12,21 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Force dark mode globally: no auto-switch based on system settings */
+
+/* Use dynamic viewport height to avoid mobile browser UI affecting layout */
+html,
+body {
+  height: 100%;
+  min-height: 100dvh;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  /* Force dark theme */
+  background-color: #0a0a0a !important;
+  color: #ededed !important;
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Ensure UA respects dark rendering for form controls, etc. */
+html { color-scheme: dark; background-color: #0a0a0a !important; }
