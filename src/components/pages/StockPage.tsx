@@ -1,7 +1,7 @@
 export default function StockPage() {
   return (
-    <section className="w-full box-border flex flex-col flex-1">
-      <div className="mx-auto w-full max-w-screen-2xl flex flex-col flex-1 min-h-0">
+    <div className="px-6 pt-2 md:pt-4 pb-4 h-[calc(100dvh-80px)] md:h-[100dvh] overflow-hidden box-border">
+      <div className="mx-auto w-full max-w-screen-2xl flex flex-col flex-1 min-h-0 h-full">
         {/* Top Bar */}
         <div className="mb-4 md:mb-6 flex items-center gap-3 flex-wrap shrink-0">
           <div className="hidden md:block w-32 h-10 rounded-xl border border-white/10 bg-white/5" />
@@ -20,31 +20,31 @@ export default function StockPage() {
         </div>
 
         {/* Main Layout */}
-        <div className="grid lg:grid-cols-[280px_1fr] gap-6 flex-1 min-h-0 h-full">
+        <div className="grid lg:grid-cols-[280px_1fr] gap-6 flex-1 min-h-0">
           {/* Filter Sidebar */}
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 flex flex-col gap-4 min-h-[200px] lg:min-h-0 lg:h-full">
-            <div className="h-4 w-24 rounded bg-white/10" />
-            <div className="space-y-2">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 flex flex-col gap-4 min-h-[200px] lg:min-h-0 overflow-y-auto">
+            <div className="h-4 w-24 rounded bg-white/10 shrink-0" />
+            <div className="space-y-2 shrink-0">
               <div className="h-9 rounded-xl border border-white/10 bg-white/5" />
               <div className="h-9 rounded-xl border border-white/10 bg-white/5" />
               <div className="h-9 rounded-xl border border-white/10 bg-white/5" />
             </div>
-            <div className="h-px bg-white/10" />
-            <div className="h-4 w-20 rounded bg-white/10" />
-            <div className="space-y-2">
+            <div className="h-px bg-white/10 shrink-0" />
+            <div className="h-4 w-20 rounded bg-white/10 shrink-0" />
+            <div className="space-y-2 shrink-0">
               <div className="h-9 rounded-xl border border-white/10 bg-white/5" />
               <div className="h-9 rounded-xl border border-white/10 bg-white/5" />
             </div>
-            <div className="mt-auto flex gap-2">
+            <div className="mt-auto flex gap-2 shrink-0">
               <div className="h-10 flex-1 rounded-xl border border-white/10 bg-white/5" />
               <div className="h-10 flex-1 rounded-xl border border-white/10 bg-white/5" />
             </div>
           </div>
 
           {/* Product Area */}
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] flex flex-col min-h-0 h-full">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] flex flex-col min-h-0">
             {/* Toolbar */}
-            <div className="border-b border-white/10 px-4 md:px-6 py-3 flex items-center justify-between">
+            <div className="border-b border-white/10 px-4 md:px-6 py-3 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
                 <div className="w-28 h-9 rounded-xl border border-white/10 bg-white/5" />
                 <div className="w-28 h-9 rounded-xl border border-white/10 bg-white/5" />
@@ -56,8 +56,8 @@ export default function StockPage() {
               </div>
             </div>
 
-            {/* Grid Area (no internal scroll) */}
-            <div className="flex-1 p-4 md:p-6">
+            {/* Grid Area (scrollable) */}
+            <div className="flex-1 min-h-0 overflow-y-auto p-4 md:p-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div key={i} className="rounded-xl border border-white/10 bg-white/[0.03] p-3 flex flex-col">
@@ -78,7 +78,7 @@ export default function StockPage() {
             </div>
 
             {/* Pagination */}
-            <div className="border-t border-white/10 px-4 md:px-6 py-3 flex items-center justify-between">
+            <div className="border-t border-white/10 px-4 md:px-6 py-3 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
                 <div className="w-20 h-9 rounded-xl border border-white/10 bg-white/5" />
                 <div className="w-20 h-9 rounded-xl border border-white/10 bg-white/5" />
@@ -93,6 +93,6 @@ export default function StockPage() {
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
