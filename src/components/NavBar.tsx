@@ -11,7 +11,7 @@ const TABS: Array<{ key: TabKey; label: string; Icon: any; href: string }> = [
   { key: "Status", label: "Status", Icon: Activity, href: "/status" },
   { key: "Mesin", label: "Mesin", Icon: Cpu, href: "/mesin" },
   { key: "Stock", label: "Stock", Icon: Package, href: "/stock" },
-  { key: "WorkerStatus", label: "Worker Status", Icon: Users, href: "/worker-status" },
+  { key: "WorkerStatus", label: "Worker", Icon: Users, href: "/worker-status" },
   { key: "Notifikasi", label: "Notifikasi", Icon: Bell, href: "/notifikasi" },
   { key: "Akun", label: "Akun", Icon: User, href: "/akun" },
 ];

@@ -34,45 +34,45 @@ export default function NotifikasiPage() {
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
 
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
-    return date.toLocaleDateString();
+    if (minutes < 1) return 'Baru saja';
+    if (minutes < 60) return `${minutes} menit lalu`;
+    if (hours < 24) return `${hours} jam lalu`;
+    if (days < 7) return `${days} hari lalu`;
+    return date.toLocaleDateString('id-ID');
   };
 
   return (
-    <section className="w-full p-4 md:p-8 box-border min-h-full flex flex-col">
+    <section className="w-full box-border flex flex-col flex-1">
       <div className="mx-auto w-full max-w-screen-2xl flex flex-col flex-1 min-h-0">
-        <div className="mb-8 flex items-start justify-between gap-4 flex-wrap shrink-0">
+        <div className="mb-4 md:mb-6 flex items-start justify-between gap-4 flex-wrap shrink-0">
           <div className="space-y-2">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent tracking-tight">
-              Notifications
+              Notifikasi
             </h1>
             <p className="text-base text-gray-400/80 font-light max-w-md">
-              Stay updated with real-time alerts and system events
+              Tetap terbarui dengan peringatan dan kejadian sistem secara real-time
             </p>
           </div>
           <div className="flex items-center gap-4">
             {unreadCount > 0 && (
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20">
                 <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                <span className="text-sm text-amber-400 font-medium">{unreadCount} New</span>
+                <span className="text-sm text-amber-400 font-medium">{unreadCount} Baru</span>
               </div>
             )}
             <button className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/70 hover:text-white transition-all duration-300 text-sm font-medium">
-              Mark All Read
+              Tandai Semua Dibaca
             </button>
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-[280px_1fr] gap-6 flex-1 min-h-0">
+        <div className="grid lg:grid-cols-[280px_1fr] gap-6 flex-1 min-h-0 h-full">
           <div className="space-y-6">
             <div className="rounded-2xl bg-gradient-to-br from-gray-900/60 to-black/60 backdrop-blur-xl border border-white/10 p-4">
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search notifications..."
+                  placeholder="Cari notifikasi..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full px-4 py-3 pl-10 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-all duration-300 text-sm"
@@ -86,31 +86,31 @@ export default function NotifikasiPage() {
 
 
             <div className="rounded-2xl bg-gradient-to-br from-gray-900/60 to-black/60 backdrop-blur-xl border border-white/10 p-4">
-              <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-4">Quick Stats</h3>
+              <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-4">Statistik Singkat</h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-white/50">Today</span>
+                  <span className="text-sm text-white/50">Hari Ini</span>
                   <span className="text-sm text-white/80 font-semibold">0</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-white/50">This Week</span>
+                  <span className="text-sm text-white/50">Minggu Ini</span>
                   <span className="text-sm text-white/80 font-semibold">0</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-white/50">This Month</span>
+                  <span className="text-sm text-white/50">Bulan Ini</span>
                   <span className="text-sm text-white/80 font-semibold">0</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl bg-gradient-to-br from-gray-900/60 to-black/60 backdrop-blur-xl border border-white/10 overflow-hidden flex flex-col">
+          <div className="rounded-2xl bg-gradient-to-br from-gray-900/60 to-black/60 backdrop-blur-xl border border-white/10 overflow-hidden flex flex-col min-h-0 h-full">
             <div className="border-b border-white/10 bg-gradient-to-r from-gray-900/80 to-black/80 backdrop-blur-sm px-6 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <h2 className="text-lg font-semibold text-white/90">Notification Feed</h2>
+                  <h2 className="text-lg font-semibold text-white/90">Feed Notifikasi</h2>
                   <span className="text-xs text-white/50 bg-white/10 px-2 py-1 rounded-lg">
-                    {filteredNotifications.length} items
+                    {filteredNotifications.length} notifikasi
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -136,9 +136,9 @@ export default function NotifikasiPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                     </svg>
                   </div>
-                  <h3 className="text-white/70 font-medium mb-2">No notifications found</h3>
+                  <h3 className="text-white/70 font-medium mb-2">Tidak ada notifikasi</h3>
                   <p className="text-white/40 text-sm text-center max-w-xs">
-                    Try adjusting your filters or search query
+                    Coba ubah filter atau kata pencarian
                   </p>
                 </div>
               ) : (
@@ -193,10 +193,10 @@ export default function NotifikasiPage() {
               <div className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2 text-white/50">
                   <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                  <span className="font-medium">Real-time updates active</span>
+                  <span className="font-medium">Pembaruan real-time aktif</span>
                 </div>
                 <button className="text-white/40 hover:text-white/60 font-medium transition-colors duration-300">
-                  Load More →
+                  Muat Lagi →
                 </button>
               </div>
             </div>
