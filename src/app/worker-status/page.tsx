@@ -2,7 +2,7 @@ import WorkerStatusPage from "@/components/pages/WorkerStatusPage";
 
 export default function Page() {
   return (
-    <main className="p-6">
+    <main className="px-6 pt-2 md:pt-4 pb-4 flex flex-col h-[calc(100dvh-80px)] md:h-[100dvh] overflow-hidden box-border">
       <WorkerStatusPage />
     </main>
   );
