@@ -10,6 +10,13 @@ export default function StatusPage() {
   const [latency, setLatency] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [lastCheckedAt, setLastCheckedAt] = useState<Date | null>(null);
+  const [httpCode, setHttpCode] = useState<number | null>(null);
+  const [payloadSize, setPayloadSize] = useState<number | null>(null);
+  const [skewMs, setSkewMs] = useState<number | null>(null);
+  const [history, setHistory] = useState<Array<{ at: string; ok: boolean; ms: number }>>([]);
+  const [successCount, setSuccessCount] = useState(0);
+  const [failureCount, setFailureCount] = useState(0);
+  const POLL_INTERVAL_MS = 15000;
 
   const fetchHealth = async () => {
     setLoading(true);
@@ -17,16 +24,48 @@ export default function StatusPage() {
     try {
       const res = await fetch(ENDPOINTS.health, { method: "GET", cache: "no-store" });
       const end = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
-      setLatency(Math.max(0, Math.round(end - start)));
-      if (res.ok) {
-        const json: any = await res.json();
-        setHealth(json && json.status === "ok" ? "ok" : "fail");
-        setServerTime(typeof json?.timestamp === "string" ? json.timestamp : null);
+      const ms = Math.max(0, Math.round(end - start));
+      setLatency(ms);
+      setHttpCode(res.status);
+
+      // Read as text to both compute payload size and parse JSON safely
+      const text = await res.text();
+      const sizeBytes = typeof TextEncoder !== "undefined" ? new TextEncoder().encode(text).length : text.length;
+      setPayloadSize(sizeBytes);
+
+      let json: any = null;
+      try { json = text ? JSON.parse(text) : null; } catch {}
+
+      const isOk = res.ok && json && json.status === "ok";
+      setHealth(isOk ? "ok" : "fail");
+      const ts = typeof json?.timestamp === "string" ? json.timestamp : null;
+      setServerTime(ts);
+      if (ts) {
+        try {
+          const sMs = new Date(ts).getTime();
+          const nowMs = Date.now();
+          setSkewMs(Math.abs(nowMs - sMs));
+        } catch {
+          setSkewMs(null);
+        }
       } else {
-        setHealth("fail");
+        setSkewMs(null);
       }
+
+      // Update stats and history (keep last 20)
+      setHistory((prev) => [{ at: new Date().toISOString(), ok: isOk, ms }, ...prev].slice(0, 20));
+      if (isOk) setSuccessCount((c) => c + 1); else setFailureCount((c) => c + 1);
     } catch {
+      // Measure duration even on failure
+      const endErr = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+      const msErr = Math.max(0, Math.round(endErr - start));
+      setLatency(msErr);
       setHealth("fail");
+      setHttpCode(null);
+      setPayloadSize(null);
+      setSkewMs(null);
+      setHistory((prev) => [{ at: new Date().toISOString(), ok: false, ms: msErr }, ...prev].slice(0, 20));
+      setFailureCount((c) => c + 1);
     } finally {
       setLastCheckedAt(new Date());
       setLoading(false);
@@ -35,7 +74,7 @@ export default function StatusPage() {
 
   useEffect(() => {
     fetchHealth();
-    const id = setInterval(fetchHealth, 15000);
+    const id = setInterval(fetchHealth, POLL_INTERVAL_MS);
     return () => clearInterval(id);
   }, []);
 
@@ -61,6 +100,34 @@ export default function StatusPage() {
       return "-";
     }
   };
+
+  const formatBytes = (n?: number | null) => {
+    if (n === null || n === undefined) return "-";
+    if (n < 1024) return `${n} B`;
+    const kb = n / 1024;
+    if (kb < 1024) return `${kb.toFixed(1)} KB`;
+    return `${(kb / 1024).toFixed(2)} MB`;
+  };
+
+  const formatDuration = (ms?: number | null) => {
+    if (ms === null || ms === undefined) return "-";
+    const abs = Math.abs(ms);
+    if (abs < 1000) return `${abs} ms`;
+    const s = abs / 1000;
+    if (s < 60) return `${s.toFixed(1)} dtk`;
+    const m = s / 60;
+    return `${m.toFixed(1)} mnt`;
+  };
+
+  // Derived stats
+  const totalChecks = successCount + failureCount;
+  const successRate = totalChecks > 0 ? Math.round((successCount / totalChecks) * 100) : null;
+  const bars = history.slice(0, 12).reverse();
+  const maxBarMs = bars.length ? Math.max(1, ...bars.map((b) => b.ms)) : 1;
+  const msVals = history.map((h) => h.ms);
+  const minMs = msVals.length ? Math.min(...msVals) : null;
+  const maxMs = msVals.length ? Math.max(...msVals) : null;
+  const avgMs = msVals.length ? Math.round(msVals.reduce((a, b) => a + b, 0) / msVals.length) : null;
 
   return (
     <section className="w-full p-4 md:p-6 box-border min-h-full flex flex-col">
@@ -178,6 +245,7 @@ export default function StatusPage() {
               </div>
             </div>
             <div className="flex-1 p-3 sm:p-4 space-y-3">
+              {/* Primary status row */}
               <div className="flex items-center justify-between rounded-lg border border-[#2a2a2a] bg-[#0f0f0f] p-3">
                 <div className="flex items-center gap-3">
                   <Server className="h-4 w-4 text-[#9a9a9a]" />
@@ -188,8 +256,45 @@ export default function StatusPage() {
                     </div>
                   </div>
                 </div>
-                <div className="text-xs text-[#9a9a9a]">{latency !== null ? `${latency} ms` : "-"}</div>
+                <div className="flex items-center gap-3 text-xs text-[#9a9a9a]">
+                  <span className="hidden sm:inline text-[#6a6a6a]">HTTP</span>
+                  <span className="rounded px-1.5 py-0.5 border border-[#2a2a2a] bg-[#111] text-[#c2c2c2]">{httpCode ?? "-"}</span>
+                  <span>{latency !== null ? `${latency} ms` : "-"}</span>
+                </div>
               </div>
+
+              {/* Latency sparkline and quick stats */}
+              <div className="rounded-lg border border-[#2a2a2a] bg-[#0f0f0f] p-3">
+                <div className="flex items-center justify-between">
+                  <div className="text-[10px] font-medium uppercase tracking-wider text-[#9a9a9a]">
+                    Latensi (12 cek terakhir)
+                  </div>
+                  <div className="text-[10px] text-[#9a9a9a]">
+                    {avgMs !== null ? `rata² ${avgMs} ms` : "-"}
+                  </div>
+                </div>
+                <div className="mt-2 h-14 flex items-end gap-1">
+                  {bars.length === 0 ? (
+                    <div className="text-xs text-[#6a6a6a]">Belum ada data</div>
+                  ) : (
+                    bars.map((b, i) => (
+                      <div
+                        key={i}
+                        className={`flex-1 rounded-sm ${b.ok ? "bg-emerald-600/80" : "bg-red-600/80"} border ${b.ok ? "border-emerald-700/80" : "border-red-700/80"}`}
+                        style={{ height: `${Math.max(4, Math.round((b.ms / maxBarMs) * 56))}px` }}
+                        title={`${b.ms} ms`}
+                      />
+                    ))
+                  )}
+                </div>
+                <div className="mt-2 grid grid-cols-3 gap-2 text-[11px] text-[#bdbdbd]">
+                  <div className="rounded border border-[#2a2a2a] bg-[#111] px-2 py-1">Min: {minMs ?? "-"} ms</div>
+                  <div className="rounded border border-[#2a2a2a] bg-[#111] px-2 py-1">Avg: {avgMs ?? "-"} ms</div>
+                  <div className="rounded border border-[#2a2a2a] bg-[#111] px-2 py-1">Max: {maxMs ?? "-"} ms</div>
+                </div>
+              </div>
+
+              {/* Details grid */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-lg border border-[#2a2a2a] bg-[#0f0f0f] p-3">
                   <div className="text-[10px] font-medium uppercase tracking-wider text-[#9a9a9a]">Status</div>
@@ -208,10 +313,34 @@ export default function StatusPage() {
                   <div className="text-[10px] font-medium uppercase tracking-wider text-[#9a9a9a]">Waktu Server</div>
                   <div className="mt-1 text-sm text-[#e5e5e5]">{serverTime ? formatDateTime(serverTime) : "-"}</div>
                 </div>
+                <div className="rounded-lg border border-[#2a2a2a] bg-[#0f0f0f] p-3">
+                  <div className="text-[10px] font-medium uppercase tracking-wider text-[#9a9a9a]">Waktu Lokal</div>
+                  <div className="mt-1 text-sm text-[#e5e5e5]">{formatDateTime(new Date().toISOString())}</div>
+                </div>
+                <div className="rounded-lg border border-[#2a2a2a] bg-[#0f0f0f] p-3">
+                  <div className="text-[10px] font-medium uppercase tracking-wider text-[#9a9a9a]">Selisih Waktu</div>
+                  <div className="mt-1 text-sm text-[#e5e5e5]">{formatDuration(skewMs)}</div>
+                </div>
+                <div className="rounded-lg border border-[#2a2a2a] bg-[#0f0f0f] p-3">
+                  <div className="text-[10px] font-medium uppercase tracking-wider text-[#9a9a9a]">HTTP Status</div>
+                  <div className="mt-1 text-sm text-[#e5e5e5]">{httpCode ?? "-"}</div>
+                </div>
+                <div className="rounded-lg border border-[#2a2a2a] bg-[#0f0f0f] p-3">
+                  <div className="text-[10px] font-medium uppercase tracking-wider text-[#9a9a9a]">Ukuran Respon</div>
+                  <div className="mt-1 text-sm text-[#e5e5e5]">{formatBytes(payloadSize)}</div>
+                </div>
+                <div className="rounded-lg border border-[#2a2a2a] bg-[#0f0f0f] p-3">
+                  <div className="text-[10px] font-medium uppercase tracking-wider text-[#9a9a9a]">Total Cek</div>
+                  <div className="mt-1 text-sm text-[#e5e5e5]">{totalChecks}</div>
+                </div>
+                <div className="rounded-lg border border-[#2a2a2a] bg-[#0f0f0f] p-3">
+                  <div className="text-[10px] font-medium uppercase tracking-wider text-[#9a9a9a]">Rasio Sukses</div>
+                  <div className="mt-1 text-sm text-[#e5e5e5]">{successRate !== null ? `${successRate}%` : "-"}</div>
+                </div>
               </div>
             </div>
             <div className="border-t border-[#1e1e1e] bg-[#0f0f0f]/60 px-4 py-2.5 text-right text-xs text-[#7a7a7a] sm:px-5">
-              Terakhir cek: {lastCheckedAt ? formatLocalTime(lastCheckedAt) : "-"}
+              Terakhir cek: {lastCheckedAt ? formatLocalTime(lastCheckedAt) : "-"} · Interval: {Math.round(POLL_INTERVAL_MS / 1000)} dtk
             </div>
           </div>
 
