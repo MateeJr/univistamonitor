@@ -1,15 +1,17 @@
 "use client";
 
-import { Home, Activity, FileText, Bell, User } from "lucide-react";
+import { Home, Activity, Bell, User, Cpu, Package, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export type TabKey = "Home" | "Status" | "Laporan" | "Notifikasi" | "Akun";
+export type TabKey = "Home" | "Status" | "Mesin" | "Stock" | "WorkerStatus" | "Notifikasi" | "Akun";
 
 const TABS: Array<{ key: TabKey; label: string; Icon: any; href: string }> = [
   { key: "Home", label: "Home", Icon: Home, href: "/" },
   { key: "Status", label: "Status", Icon: Activity, href: "/status" },
-  { key: "Laporan", label: "Laporan", Icon: FileText, href: "/laporan" },
+  { key: "Mesin", label: "Mesin", Icon: Cpu, href: "/mesin" },
+  { key: "Stock", label: "Stock", Icon: Package, href: "/stock" },
+  { key: "WorkerStatus", label: "Worker Status", Icon: Users, href: "/worker-status" },
   { key: "Notifikasi", label: "Notifikasi", Icon: Bell, href: "/notifikasi" },
   { key: "Akun", label: "Akun", Icon: User, href: "/akun" },
 ];

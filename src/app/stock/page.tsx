@@ -1,9 +1,9 @@
-import LaporanPage from "@/components/pages/LaporanPage";
+import StockPage from "@/components/pages/StockPage";
 
 export default function Page() {
   return (
     <main className="p-6">
-      <LaporanPage />
+      <StockPage />
     </main>
   );
 }

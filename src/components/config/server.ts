@@ -14,4 +14,13 @@ export const ENDPOINTS = {
   // shared endpoints
   health: `${SERVER_BASE}/health`,
   time: `${SERVER_BASE}/api/time`,
+  // system monitoring endpoints
+  systemCpu: `${SERVER_BASE}/api/system/cpu`,
+  systemMemory: `${SERVER_BASE}/api/system/memory`,
+  systemNetwork: `${SERVER_BASE}/api/system/network`,
+  systemInfo: `${SERVER_BASE}/api/system/info`,
+  systemProcess: `${SERVER_BASE}/api/system/process`,
+  networkSpeed: `${SERVER_BASE}/api/network/speed`,
+  networkPing: `${SERVER_BASE}/api/network/ping`,
+  systemStatus: `${SERVER_BASE}/api/system/status`,
 };
