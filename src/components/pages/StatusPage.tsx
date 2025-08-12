@@ -240,7 +240,7 @@ export default function StatusPage() {
                   aria-label="refresh-health"
                 >
                   <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-                  Perbarui
+                  Refresh
                 </button>
               </div>
             </div>
