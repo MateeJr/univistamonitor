@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { ENDPOINTS } from "@/components/config/server";
 import AddSparepartModal, { NewSparepartPayload } from "@/components/modals/AddSparepartModal";
+import SparepartDetailModal, { SparepartDetail } from "@/components/modals/SparepartDetailModal";
 import { Plus, RefreshCw } from "lucide-react";
 
 type StockItem = {
@@ -20,6 +21,8 @@ export default function StockPage() {
   const [error, setError] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailData, setDetailData] = useState<SparepartDetail | null>(null);
 
   const fetchList = async () => {
     try {
@@ -164,7 +167,7 @@ export default function StockPage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   {filtered.map((it) => (
-                    <div key={it.id} className="group rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] transition-colors p-3 flex flex-col">
+                    <button key={it.id} type="button" onClick={() => { setDetailData(it as SparepartDetail); setDetailOpen(true); }} className="text-left group rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] transition-colors p-3 flex flex-col">
                       <div className="relative aspect-square rounded-lg border border-white/10 bg-white/5 overflow-hidden">
                         {it.imageUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -183,9 +186,8 @@ export default function StockPage() {
                       </div>
                       <div className="mt-3 flex items-center gap-2 flex-wrap">
                         <span className="inline-flex items-center gap-2 h-6 px-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-200 text-xs">Stok: {it.stock}</span>
-                        <span className="inline-flex items-center gap-2 h-6 px-2 rounded-lg bg-white/5 border border-white/10 text-white/70 text-[11px]">ID: {it.id}</span>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}
@@ -210,6 +212,7 @@ export default function StockPage() {
 
       {/* Modal */}
       <AddSparepartModal visible={addOpen} onClose={() => setAddOpen(false)} onSubmit={onAddSubmit} submitting={adding} />
+      <SparepartDetailModal visible={detailOpen} data={detailData} onClose={() => { setDetailOpen(false); setDetailData(null); }} />
     </div>
   );
 }
