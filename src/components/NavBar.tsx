@@ -62,8 +62,8 @@ export default function NavBar() {
 
       {/* Desktop Navigation - Sidebar */}
       <div className="hidden md:flex h-full">
-        <div className="flex flex-col w-full bg-zinc-950/80 backdrop-blur-2xl border-r border-zinc-800/50">
-          <div className="flex items-center justify-center py-6">
+        <div className="flex flex-col w-full bg-zinc-950/80 backdrop-blur-2xl border-r border-zinc-800/50 min-h-0">
+          <div className="flex items-center justify-center py-6 shrink-0">
             <Link href="/" title="Home">
               <motion.div
                 whileHover={{ scale: 1.1, rotate: -5 }}
@@ -75,7 +75,7 @@ export default function NavBar() {
             </Link>
           </div>
           
-          <div className="flex flex-col items-center flex-1 gap-4 p-4">
+          <div className="flex flex-col items-center flex-1 gap-4 p-4 min-h-0 overflow-y-auto uv-scrollbar">
             {TABS.map(({ key, label, Icon, href }) => {
               const isActive = pathname === href;
               return (
