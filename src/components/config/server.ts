@@ -34,4 +34,5 @@ export const ENDPOINTS = {
   workersCreate: `${SERVER_BASE}/api/workers`, // POST
   workersDetailBase: `${SERVER_BASE}/api/workers`, // use: `${workersDetailBase}/${id}`
   workersDeleteBase: `${SERVER_BASE}/api/workers`, // use: `${workersDeleteBase}/${id}` (DELETE)
+  workersStatusList: `${SERVER_BASE}/api/workers/statuslist`, // GET/POST/DELETE
 };

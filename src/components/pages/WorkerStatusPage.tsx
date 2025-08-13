@@ -4,7 +4,8 @@ import { ENDPOINTS } from "@/components/config/server";
 import AddWorkerModal, { NewWorkerPayload } from "@/components/modals/AddWorkerModal";
 import WorkerDetailModal, { WorkerDetail } from "@/components/modals/WorkerDetailModal";
 import ConfirmDeleteModal from "@/components/modals/ConfirmDeleteModal";
-import { Eye, Trash2, Plus, Circle, Pencil } from "lucide-react";
+import { Eye, Trash2, Plus, Circle, Pencil, ListPlus } from "lucide-react";
+import SelectModal from "@/components/modals/SelectModal";
 
 type WorkerListItem = {
   id: string;
@@ -17,7 +18,7 @@ type WorkerListItem = {
   updatedAt?: string | null;
 };
 
-type StatusFilter = WorkerListItem['status'] | 'all';
+type StatusFilter = string | 'all';
 
 function getInitials(name?: string) {
   if (!name) return "?";
@@ -56,6 +57,30 @@ export default function WorkerStatusPage() {
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [serverTimeIso, setServerTimeIso] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  type StatusItem = { key: string; color: string };
+  function defaultColorForKey(key?: string) {
+    const k = String(key || '').toLowerCase();
+    if (k === 'tersedia') return '#22c55e';
+    if (k === 'sibuk') return '#eab308';
+    if (k === 'sedang-bekerja') return '#ef4444';
+    if (k === 'tidak-hadir') return '#9ca3af';
+    return '#818cf8';
+  }
+  const [statusList, setStatusList] = useState<StatusItem[] | string[]>([
+    { key: 'tersedia', color: defaultColorForKey('tersedia') },
+    { key: 'sibuk', color: defaultColorForKey('sibuk') },
+    { key: 'sedang-bekerja', color: defaultColorForKey('sedang-bekerja') },
+    { key: 'tidak-hadir', color: defaultColorForKey('tidak-hadir') },
+  ]);
+
+  function slugifyStatusKey(input: string) {
+    return String(input || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9\-\s]/g, '')
+      .replace(/\s+/g, '-');
+  }
+  const [statusModalOpen, setStatusModalOpen] = useState(false);
 
   const fetchList = async () => {
     try {
@@ -83,9 +108,27 @@ export default function WorkerStatusPage() {
 
   useEffect(() => {
     fetchList();
+    // Load status list
+    (async () => {
+      try {
+        const r = await fetch(ENDPOINTS.workersStatusList);
+        const j = await r.json();
+        if (r.ok && j && j.ok && Array.isArray(j.statuses)) {
+          setStatusList(j.statuses);
+        }
+      } catch {}
+    })();
     const id = setInterval(fetchList, 15000);
     return () => clearInterval(id);
   }, []);
+
+  // Keep status filter options in sync whenever list changes
+  useEffect(() => {
+    const keys = (statusList as any[]).map((s) => (typeof s === 'string' ? s : s.key));
+    if (statusFilter !== 'all' && !keys.includes(statusFilter)) {
+      setStatusFilter('all');
+    }
+  }, [statusList]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -104,7 +147,8 @@ export default function WorkerStatusPage() {
       });
     }
     if (statusFilter !== 'all') {
-      base = base.filter((it) => (it.status || 'tersedia') === statusFilter);
+      const target = String(statusFilter).toLowerCase();
+      base = base.filter((it) => String(it.status || 'tersedia').toLowerCase() === target);
     }
     return base;
   }, [items, search, statusFilter]);
@@ -190,24 +234,35 @@ export default function WorkerStatusPage() {
     }
   };
 
+  function statusKeyToLabel(v: string) {
+    const k = v.toLowerCase();
+    if (k === 'tersedia') return 'TERSEDIA';
+    if (k === 'sibuk') return 'SIBUK';
+    if (k === 'sedang-bekerja') return 'SEDANG BEKERJA';
+    if (k === 'tidak-hadir') return 'TIDAK HADIR';
+    return v.replace(/-/g, ' ').toUpperCase();
+  }
+
+  function getStatusColor(value?: string | null) {
+    const key = String(value || 'tersedia').toLowerCase();
+    const list = (statusList as any[]);
+    for (const raw of list) {
+      const obj = typeof raw === 'string' ? { key: raw, color: defaultColorForKey(raw) } : raw;
+      if (String(obj.key).toLowerCase() === key) return obj.color || defaultColorForKey(key);
+    }
+    return defaultColorForKey(key);
+  }
+
   function StatusPill({ value }: { value?: WorkerListItem['status'] }) {
-    const v = value || 'tersedia';
-    const color = v === 'tersedia' ? 'text-green-400' : v === 'sibuk' ? 'text-yellow-400' : v === 'sedang-bekerja' ? 'text-red-400' : 'text-white/40';
-    const label = v === 'tersedia' ? 'TERSEDIA' : v === 'sibuk' ? 'SIBUK' : v === 'sedang-bekerja' ? 'SEDANG BEKERJA' : 'TIDAK HADIR';
+    const v = (value || 'tersedia').toString().toLowerCase();
+    const color = getStatusColor(v);
+    const label = statusKeyToLabel(v);
     return (
       <div className="inline-flex items-center gap-1.5">
-        <Circle className={`w-2.5 h-2.5 ${color}`} fill="currentColor" />
+        <Circle className="w-2.5 h-2.5" style={{ color }} fill="currentColor" />
         <span className="text-xs text-white/70">{label}</span>
       </div>
     );
-  }
-
-  function getStatusBorderClass(value?: WorkerListItem['status']) {
-    const v = value || 'tersedia';
-    if (v === 'tersedia') return 'border-green-400/40';
-    if (v === 'sibuk') return 'border-yellow-400/40';
-    if (v === 'sedang-bekerja') return 'border-red-400/40';
-    return 'border-zinc-500/30';
   }
 
   function formatTimeWIBFromISO(iso?: string | null) {
@@ -277,6 +332,14 @@ export default function WorkerStatusPage() {
             >
               <Plus className="w-4 h-4" /> Tambah Anggota
             </button>
+            <button
+              type="button"
+              onClick={() => setStatusModalOpen(true)}
+              className="inline-flex items-center gap-2 h-9 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-sm font-semibold"
+              title="Kelola status kustom"
+            >
+              <ListPlus className="w-4 h-4" /> Kelola Status
+            </button>
           </div>
         </div>
 
@@ -299,10 +362,12 @@ export default function WorkerStatusPage() {
               className="h-9 px-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm hover:bg-white/10 focus:outline-none focus:border-white/30"
             >
               <option value="all">Semua Status</option>
-              <option value="tersedia">Tersedia</option>
-              <option value="sibuk">Sibuk</option>
-              <option value="sedang-bekerja">Sedang bekerja</option>
-              <option value="tidak-hadir">Tidak hadir</option>
+              {(statusList as any[]).map((raw) => {
+                const s = typeof raw === 'string' ? raw : raw.key;
+                return (
+                  <option key={s} value={s}>{String(s).replace(/-/g, ' ')}</option>
+                );
+              })}
             </select>
           </div>
           {loading && <div className="text-sm text-white/50">Memuat...</div>}
@@ -329,7 +394,7 @@ export default function WorkerStatusPage() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {filtered.map((it) => (
-                  <div key={it.id} className={`group relative rounded-2xl border-2 bg-white/[0.03] hover:bg-white/[0.06] transition-colors ${getStatusBorderClass(it.status)}`}>
+                  <div key={it.id} className={`group relative rounded-2xl border-2 bg-white/[0.03] hover:bg-white/[0.06] transition-colors`} style={{ borderColor: getStatusColor(it.status as any) + '66' }}>
                     <div className="p-4 md:p-5 flex flex-col gap-3">
                       <div className="flex items-start gap-3">
                         <div className="w-12 h-12 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white text-sm font-semibold shrink-0">
@@ -358,10 +423,12 @@ export default function WorkerStatusPage() {
                           onChange={(e) => setStatus(it.id, e.target.value as WorkerListItem['status'])}
                           className="appearance-none text-xs bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-white/80 hover:bg-white/10 focus:outline-none focus:border-white/30"
                         >
-                          <option value="tersedia">Tersedia</option>
-                          <option value="sibuk">Sibuk</option>
-                          <option value="sedang-bekerja">Sedang bekerja</option>
-                          <option value="tidak-hadir">Tidak hadir</option>
+                          {(statusList as any[]).map((raw) => {
+                            const s = typeof raw === 'string' ? raw : raw.key;
+                            return (
+                              <option key={s} value={s}>{String(s).replace(/-/g, ' ')}</option>
+                            );
+                          })}
                         </select>
                         <button
                           type="button"
@@ -419,6 +486,64 @@ export default function WorkerStatusPage() {
         onConfirm={doDelete}
         onClose={() => setDeleteTarget(null)}
         confirmLabel="Hapus Worker"
+      />
+      <SelectModal
+        visible={statusModalOpen}
+        title="Kelola Status"
+        items={statusList as any}
+        onClose={() => setStatusModalOpen(false)}
+        onAdd={async (raw, color) => {
+          try {
+            const r = await fetch(ENDPOINTS.workersStatusList, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: raw, color }) });
+            const j = await r.json();
+            if (r.ok && j && j.ok && Array.isArray(j.statuses)) {
+              setStatusList(j.statuses);
+              setStatusModalOpen(false);
+            } else {
+              alert(j?.error || 'Gagal menambah status');
+            }
+          } catch {
+            alert('Gagal menambah status');
+          }
+        }}
+        onDelete={async (key) => {
+          try {
+            const r = await fetch(ENDPOINTS.workersStatusList, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: key }) });
+            const j = await r.json();
+            if (r.ok && j && j.ok && Array.isArray(j.statuses)) {
+              setStatusList(j.statuses);
+            } else {
+              alert(j?.error || 'Gagal menghapus status');
+            }
+          } catch {
+            alert('Gagal menghapus status');
+          }
+        }}
+        onEdit={async (oldKey, newKey, color) => {
+          const oldSlug = slugifyStatusKey(oldKey);
+          const newSlug = slugifyStatusKey(newKey);
+          try {
+            // If only color changed (same key), use POST upsert to avoid PATCH not-found edge cases
+            if (oldSlug === newSlug) {
+              const r = await fetch(ENDPOINTS.workersStatusList, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: newSlug, color }) });
+              const j = await r.json();
+              if (r.ok && j && j.ok && Array.isArray(j.statuses)) {
+                setStatusList(j.statuses);
+                return;
+              }
+              // fallthrough to PATCH if POST did not return ok for some reason
+            }
+            const r2 = await fetch(ENDPOINTS.workersStatusList, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ oldValue: oldSlug, newValue: newSlug, color }) });
+            const j2 = await r2.json();
+            if (r2.ok && j2 && j2.ok && Array.isArray(j2.statuses)) {
+              setStatusList(j2.statuses);
+            } else {
+              alert(j2?.error || 'Gagal mengubah status');
+            }
+          } catch {
+            alert('Gagal mengubah status');
+          }
+        }}
       />
     </section>
   );
