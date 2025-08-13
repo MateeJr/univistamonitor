@@ -4,6 +4,7 @@ import { ENDPOINTS } from "@/components/config/server";
 import AddSparepartModal, { NewSparepartPayload } from "@/components/modals/AddSparepartModal";
 import SparepartDetailModal, { SparepartDetail } from "@/components/modals/SparepartDetailModal";
 import ImagePreviewModal from "@/components/modals/ImagePreviewModal";
+import ConfirmDeleteProductModal from "@/components/modals/ConfirmDeleteProductModal";
 import { Plus, RefreshCw } from "lucide-react";
 
 type StockItem = {
@@ -28,6 +29,7 @@ export default function StockPage() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewSrc, setPreviewSrc] = useState<string | null>(null);
   const [stockRangeFilter, setStockRangeFilter] = useState<string | null>(null);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   const fetchList = async () => {
     try {
@@ -92,6 +94,7 @@ export default function StockPage() {
       await fetchList();
       setDetailOpen(false);
       setDetailData(null);
+      setConfirmDeleteOpen(false);
     } catch (e) {
       alert('Gagal menghapus sparepart');
     }
@@ -334,7 +337,21 @@ export default function StockPage() {
         <AddSparepartModal visible={addOpen} onClose={() => setAddOpen(false)} onSubmit={onAddSubmit} submitting={adding} />
       ) : null}
       {detailOpen ? (
-        <SparepartDetailModal visible={detailOpen} data={detailData} onClose={() => { setDetailOpen(false); setDetailData(null); }} onDelete={deleteSparepart} onSave={saveSparepart} />
+        <SparepartDetailModal
+          visible={detailOpen}
+          data={detailData}
+          onClose={() => { setDetailOpen(false); setDetailData(null); }}
+          onDelete={(id) => { setConfirmDeleteOpen(true); }}
+          onSave={saveSparepart}
+        />
+      ) : null}
+      {confirmDeleteOpen && detailData ? (
+        <ConfirmDeleteProductModal
+          visible={confirmDeleteOpen}
+          productName={detailData.name}
+          onClose={() => setConfirmDeleteOpen(false)}
+          onConfirm={() => deleteSparepart(detailData.id)}
+        />
       ) : null}
       {previewOpen ? (
         <ImagePreviewModal visible={previewOpen} src={previewSrc} onClose={() => { setPreviewOpen(false); setPreviewSrc(null); }} />
