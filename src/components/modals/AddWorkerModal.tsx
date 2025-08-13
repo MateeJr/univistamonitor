@@ -7,6 +7,7 @@ export type NewWorkerPayload = {
   bidang: string;
   description: string;
   phone?: string;
+  status?: 'tersedia' | 'sibuk' | 'tidak-hadir' | 'sedang-bekerja';
 };
 
 export default function AddWorkerModal({
@@ -50,7 +51,7 @@ export default function AddWorkerModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit || submitting) return;
-    onSubmit({ fullName: fullName.trim(), role: role.trim(), bidang: bidang.trim(), description: description.trim(), phone: phone.trim() });
+    onSubmit({ fullName: fullName.trim(), role: role.trim(), bidang: bidang.trim(), description: description.trim(), phone: phone.trim(), status: 'tersedia' });
   };
 
   return (
