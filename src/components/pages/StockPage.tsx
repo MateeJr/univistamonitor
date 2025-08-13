@@ -292,8 +292,8 @@ export default function StockPage() {
 
           {/* Product Area */}
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] flex flex-col min-h-0">
-            {/* Grid Area (scrollable) */}
-            <div className="flex-1 md:min-h-0 overflow-visible md:overflow-y-auto p-4 md:p-6">
+            {/* Grid Area (scrollable). On mobile, cap height so ~2 products are visible before internal scroll */}
+            <div className="flex-1 min-h-0 overflow-y-auto p-4 md:p-6 max-h-[70vh] md:max-h-none">
               {loading ? (
                 <div className="text-sm text-white/60">Memuat...</div>
               ) : error ? (

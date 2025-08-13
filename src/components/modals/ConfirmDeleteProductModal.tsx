@@ -32,7 +32,7 @@ export default function ConfirmDeleteProductModal({
           </div>
           <div className="flex-1 min-w-0">
             <h2 className="text-[15px] font-semibold text-[#f2f2f2]">Hapus Produk?</h2>
-            <p className="mt-1 text-[13px] leading-relaxed text-[#b5b5b5] truncate">Anda akan menghapus <span className="text-white/90 font-medium">{productName || 'produk'}</span>. Tindakan ini tidak dapat dibatalkan.</p>
+            <p className="mt-1 text-[13px] leading-relaxed text-[#b5b5b5] whitespace-normal break-words">Anda akan menghapus <span className="text-white/90 font-medium">{productName || 'produk'}</span>. Tindakan ini tidak dapat dibatalkan.</p>
           </div>
         </div>
         <div className="mt-5 flex justify-end gap-2">
