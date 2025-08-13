@@ -29,4 +29,9 @@ export const ENDPOINTS = {
   laporanDetailBase: `${SERVER_BASE}/api/laporan/detail`, // use: `${laporanDetailBase}/${jenis}/${id}`
   laporanDeleteBase: `${SERVER_BASE}/api/laporan`, // use: `${laporanDeleteBase}/${jenis}/${id}` (DELETE)
   filesBase: `${SERVER_BASE}`, // prefix for file URLs returned by server (e.g. /files/laporan/...)
+  // workers endpoints
+  workersList: `${SERVER_BASE}/api/workers`, // GET
+  workersCreate: `${SERVER_BASE}/api/workers`, // POST
+  workersDetailBase: `${SERVER_BASE}/api/workers`, // use: `${workersDetailBase}/${id}`
+  workersDeleteBase: `${SERVER_BASE}/api/workers`, // use: `${workersDeleteBase}/${id}` (DELETE)
 };
