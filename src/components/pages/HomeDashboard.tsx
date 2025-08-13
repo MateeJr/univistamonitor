@@ -99,6 +99,7 @@ export default function HomeDashboard() {
   const [stockLastUpdatedIso, setStockLastUpdatedIso] = useState<string | null>(null);
   const [laporanItems, setLaporanItems] = useState<LaporanItem[]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [todayDate, setTodayDate] = useState<string>("");
 
   const fetchHealth = async (): Promise<HealthInfo> => {
     const start = performance.now();
@@ -154,9 +155,11 @@ export default function HomeDashboard() {
     } catch {}
   };
 
-  const fetchLaporan = async () => {
+  const fetchLaporan = async (dateOverride?: string) => {
     try {
-      const res = await fetch(ENDPOINTS.laporanList, { cache: "no-store" });
+      const d = (dateOverride || todayDate || "").trim();
+      const url = d ? `${ENDPOINTS.laporanList}?date=${encodeURIComponent(d)}` : ENDPOINTS.laporanList;
+      const res = await fetch(url, { cache: "no-store" });
       const j = await res.json();
       if (res.ok && j?.ok) setLaporanItems(Array.isArray(j.items) ? j.items : []);
     } catch {}
@@ -168,17 +171,34 @@ export default function HomeDashboard() {
       const [h, s] = await Promise.all([fetchHealth(), fetchSystem()]);
       setHealth(h);
       setSystem(s);
-      await Promise.all([fetchWorkers(), fetchStock(), fetchLaporan()]);
+      const ops: Array<Promise<any>> = [fetchWorkers(), fetchStock()];
+      if (todayDate) ops.push(fetchLaporan(todayDate));
+      await Promise.all(ops);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [todayDate]);
 
   useEffect(() => {
     fetchAll();
     intervalRef.current = setInterval(fetchAll, 15000);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [fetchAll]);
+
+  // Load server time to determine today's date (WIB) so we only load today's laporan
+  useEffect(() => {
+    let canceled = false;
+    (async () => {
+      try {
+        const res = await fetch(ENDPOINTS.time, { cache: "no-store" });
+        const j = await res.json();
+        if (!canceled && res.ok && j?.ok && typeof j.date === "string") {
+          setTodayDate(j.date);
+        }
+      } catch {}
+    })();
+    return () => { canceled = true; };
+  }, []);
 
   const workersSummary = useMemo(() => {
     const counts = new Map<string, number>();
@@ -225,7 +245,7 @@ export default function HomeDashboard() {
       if (String(it.jenis).toLowerCase() === "harian") harian++;
       else if (String(it.jenis).toLowerCase() === "kerusakan") kerusakan++;
     }
-    const recent = [...laporanItems].slice(0, 5);
+    const recent = [...laporanItems].slice(0, 2);
     return { total, harian, kerusakan, recent };
   }, [laporanItems]);
 
