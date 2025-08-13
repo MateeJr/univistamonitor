@@ -1,11 +1,11 @@
 "use client";
 
-import { Home, Activity, Bell, User, Cpu, Package, Users, LucideIcon } from "lucide-react";
+import { Home, Activity, User, Cpu, Package, Users, LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
-export type TabKey = "Home" | "Status" | "Mesin" | "Stock" | "WorkerStatus" | "Notifikasi" | "Akun";
+export type TabKey = "Home" | "Status" | "Mesin" | "Stock" | "WorkerStatus" | "Akun";
 
 const TABS: Array<{ key: TabKey; label: string; Icon: LucideIcon; href: string }> = [
   { key: "Home", label: "Home", Icon: Home, href: "/" },
@@ -13,7 +13,6 @@ const TABS: Array<{ key: TabKey; label: string; Icon: LucideIcon; href: string }
   { key: "Mesin", label: "Mesin", Icon: Cpu, href: "/mesin" },
   { key: "Stock", label: "Stock", Icon: Package, href: "/stock" },
   { key: "WorkerStatus", label: "Anggota", Icon: Users, href: "/worker-status" },
-  { key: "Notifikasi", label: "Notifikasi", Icon: Bell, href: "/notifikasi" },
   { key: "Akun", label: "Akun", Icon: User, href: "/akun" },
 ];
 
