@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ENDPOINTS } from "@/components/config/server";
 import AddSparepartModal, { NewSparepartPayload } from "@/components/modals/AddSparepartModal";
 import SparepartDetailModal, { SparepartDetail } from "@/components/modals/SparepartDetailModal";
+import ImagePreviewModal from "@/components/modals/ImagePreviewModal";
 import { Plus, RefreshCw } from "lucide-react";
 
 type StockItem = {
@@ -23,12 +24,18 @@ export default function StockPage() {
   const [adding, setAdding] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailData, setDetailData] = useState<SparepartDetail | null>(null);
+  const [serverTimeIso, setServerTimeIso] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewSrc, setPreviewSrc] = useState<string | null>(null);
 
   const fetchList = async () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(ENDPOINTS.stockList);
+      const [res, timeRes] = await Promise.all([
+        fetch(ENDPOINTS.stockList),
+        fetch(ENDPOINTS.time).catch(() => null as any),
+      ]);
       const json = await res.json();
       if (!res.ok || !json.ok) throw new Error(json.error || "Gagal memuat stock");
       const list: StockItem[] = Array.isArray(json.items) ? json.items.map((it: any) => {
@@ -38,6 +45,12 @@ export default function StockPage() {
         return { id: String(it.id), name: String(it.name || ''), stock: Number(it.stock || 0), description: it.description || '', imageUrl: url, createdAt: it.createdAt || null } as StockItem;
       }) : [];
       setItems(list);
+      if (timeRes && (timeRes as Response).ok) {
+        try {
+          const tj = await (timeRes as Response).json();
+          if (tj && tj.ok && typeof tj.iso === 'string') setServerTimeIso(tj.iso);
+        } catch {}
+      }
     } catch (e: any) {
       setError(e?.message || "Gagal memuat data");
     } finally {
@@ -70,11 +83,91 @@ export default function StockPage() {
     }
   };
 
+  const deleteSparepart = async (id: string) => {
+    try {
+      const res = await fetch(`${ENDPOINTS.stockCreate}/${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (!res.ok || !json.ok) throw new Error(json.error || 'Gagal menghapus');
+      await fetchList();
+      setDetailOpen(false);
+      setDetailData(null);
+    } catch (e) {
+      alert('Gagal menghapus sparepart');
+    }
+  };
+
+  const saveSparepart = async (payload: { id: string; name: string; stock: number; description?: string; imageDataUrl?: string | null }) => {
+    try {
+      const res = await fetch(`${ENDPOINTS.stockCreate}/${payload.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) throw new Error(json.error || 'Gagal menyimpan');
+      await fetchList();
+      setDetailOpen(false);
+      setDetailData(null);
+    } catch (e) {
+      alert('Gagal menyimpan perubahan');
+    }
+  };
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return items;
     return items.filter((it) => [it.name, it.description, it.id].some((v) => (v || "").toString().toLowerCase().includes(q)));
   }, [items, search]);
+
+  function formatTimeWIBFromISO(iso?: string | null) {
+    if (!iso) return "-";
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "-";
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Jakarta',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).formatToParts(d);
+    const map: Record<string, string> = Object.fromEntries(parts.map((p) => [p.type, p.value]));
+    return `${map.hour || '00'}:${map.minute || '00'}`;
+  }
+
+  function formatDateTimeWIBFromISO(iso?: string | null) {
+    if (!iso) return "-";
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "-";
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Jakarta',
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).formatToParts(d);
+    const map: Record<string, string> = Object.fromEntries(parts.map((p) => [p.type, p.value]));
+    const dd = map.day || '00';
+    const mmm = (map.month || '').slice(0, 3);
+    const yyyy = map.year || '0000';
+    const HH = map.hour || '00';
+    const mm = map.minute || '00';
+    return `${dd}/${mmm}/${yyyy} ${HH}:${mm}`;
+  }
+
+  function isSameWIBDay(targetIso?: string | null, serverIso?: string | null) {
+    if (!targetIso) return false;
+    const target = new Date(targetIso);
+    if (isNaN(target.getTime())) return false;
+    const now = serverIso ? new Date(serverIso) : new Date();
+    const fmt = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit' });
+    return fmt.format(target) === fmt.format(now);
+  }
+
+  const lastUpdatedLabel = useMemo(() => {
+    if (!serverTimeIso) return '-';
+    return isSameWIBDay(serverTimeIso, serverTimeIso) ? formatTimeWIBFromISO(serverTimeIso) : formatDateTimeWIBFromISO(serverTimeIso);
+  }, [serverTimeIso]);
 
   return (
     <div className="px-4 md:px-6 pt-2 md:pt-4 pb-6 min-h-[calc(100dvh-80px)] md:h-[100dvh] overflow-visible md:overflow-hidden box-border">
@@ -112,6 +205,9 @@ export default function StockPage() {
             >
               <RefreshCw className="w-4 h-4" /> Refresh
             </button>
+            <div className="hidden md:flex items-center h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-xs text-white/70">
+              Terakhir diupdate: <span className="ml-1 text-white/90">{lastUpdatedLabel}</span>
+            </div>
           </div>
         </div>
 
@@ -171,7 +267,7 @@ export default function StockPage() {
                       <div className="relative aspect-square rounded-lg border border-white/10 bg-white/5 overflow-hidden">
                         {it.imageUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={it.imageUrl} alt={it.name} className="w-full h-full object-cover" />
+                          <img src={it.imageUrl} alt={it.name} className="w-full h-full object-cover cursor-zoom-in" onClick={(e) => { e.stopPropagation(); setPreviewSrc(it.imageUrl!); setPreviewOpen(true); }} />
                         ) : (
                           <div className="w-full h-full flex flex-col items-center justify-center text-white/40 text-xs">
                             <div className="h-10 w-10 rounded-md border border-white/10 bg-white/10 mb-2" />
@@ -181,11 +277,11 @@ export default function StockPage() {
                         <div className="pointer-events-none absolute inset-0 ring-0 group-hover:ring-1 group-hover:ring-white/10" />
                       </div>
                       <div className="mt-3 space-y-1">
-                        <div className="text-white/90 font-semibold truncate">{it.name}</div>
+                        <div className="flex items-center justify-between gap-2 min-w-0">
+                          <div className="text-white/90 font-semibold truncate">{it.name}</div>
+                          <span className="shrink-0 inline-flex items-center gap-1 h-5 px-2 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-200 text-[11px]">Stok: {it.stock}</span>
+                        </div>
                         <div className="text-white/60 text-sm truncate">{it.description || '-'}</div>
-                      </div>
-                      <div className="mt-3 flex items-center gap-2 flex-wrap">
-                        <span className="inline-flex items-center gap-2 h-6 px-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-200 text-xs">Stok: {it.stock}</span>
                       </div>
                     </button>
                   ))}
@@ -211,8 +307,15 @@ export default function StockPage() {
       </div>
 
       {/* Modal */}
-      <AddSparepartModal visible={addOpen} onClose={() => setAddOpen(false)} onSubmit={onAddSubmit} submitting={adding} />
-      <SparepartDetailModal visible={detailOpen} data={detailData} onClose={() => { setDetailOpen(false); setDetailData(null); }} />
+      {addOpen ? (
+        <AddSparepartModal visible={addOpen} onClose={() => setAddOpen(false)} onSubmit={onAddSubmit} submitting={adding} />
+      ) : null}
+      {detailOpen ? (
+        <SparepartDetailModal visible={detailOpen} data={detailData} onClose={() => { setDetailOpen(false); setDetailData(null); }} onDelete={deleteSparepart} onSave={saveSparepart} />
+      ) : null}
+      {previewOpen ? (
+        <ImagePreviewModal visible={previewOpen} src={previewSrc} onClose={() => { setPreviewOpen(false); setPreviewSrc(null); }} />
+      ) : null}
     </div>
   );
 }
