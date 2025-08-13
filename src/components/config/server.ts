@@ -23,4 +23,10 @@ export const ENDPOINTS = {
   networkSpeed: `${SERVER_BASE}/api/network/speed`,
   networkPing: `${SERVER_BASE}/api/network/ping`,
   systemStatus: `${SERVER_BASE}/api/system/status`,
+  // laporan endpoints
+  laporanSubmit: `${SERVER_BASE}/api/laporan/submit`,
+  laporanList: `${SERVER_BASE}/api/laporan/list`,
+  laporanDetailBase: `${SERVER_BASE}/api/laporan/detail`, // use: `${laporanDetailBase}/${jenis}/${id}`
+  laporanDeleteBase: `${SERVER_BASE}/api/laporan`, // use: `${laporanDeleteBase}/${jenis}/${id}` (DELETE)
+  filesBase: `${SERVER_BASE}`, // prefix for file URLs returned by server (e.g. /files/laporan/...)
 };

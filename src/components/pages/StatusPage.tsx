@@ -322,17 +322,17 @@ export default function StatusPage() {
         <div className="mb-8 flex items-end justify-between shrink-0">
           <div className="space-y-2">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent tracking-tight">
-              System Status
+              Status Sistem
             </h1>
             <p className="text-base text-gray-400/80 font-light max-w-md">
-              Comprehensive real-time system monitoring with performance metrics, network status, and health indicators.
+              Monitoring sistem real-time lengkap dengan metrik performa, status jaringan, dan indikator kesehatan.
             </p>
           </div>
           <div className="flex items-center gap-4">
             <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-emerald-500/10 to-blue-500/10 border border-emerald-500/20">
               <div className={`w-2 h-2 rounded-full ${isPageVisible ? 'bg-emerald-400 animate-pulse' : 'bg-gray-500'}`} />
               <span className={`text-sm font-medium ${isPageVisible ? 'text-emerald-400' : 'text-gray-500'}`}>
-                {isPageVisible ? 'Live' : 'Paused'}
+                {isPageVisible ? 'Live' : 'Jeda'}
               </span>
             </div>
             <button
@@ -363,7 +363,7 @@ export default function StatusPage() {
                       "bg-gray-500"
                     } shadow-lg`} />
                     <div className="text-lg font-bold text-white/90">
-                      {health.status === "ok" ? "Online" : health.status === "fail" ? "Offline" : "Unknown"}
+                      {health.status === "ok" ? "Online" : health.status === "fail" ? "Offline" : "Gak Tau"}
                     </div>
                   </div>
                 </div>
@@ -386,7 +386,7 @@ export default function StatusPage() {
             <div className="relative p-6">
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-3 flex-1">
-                  <div className="text-xs font-semibold uppercase tracking-wider text-white/60">CPU Usage</div>
+                  <div className="text-xs font-semibold uppercase tracking-wider text-white/60">Pemakaian CPU</div>
                   <div className="text-2xl font-bold text-white/90">
                     {systemData ? `${Math.round(systemData.cpu.usage.total)}%` : "-"}
                   </div>
@@ -397,7 +397,7 @@ export default function StatusPage() {
               </div>
               <div className="mt-4">
                 <div className="text-xs text-white/60">
-                  {systemData ? `${systemData.cpu.count} cores` : "-"}
+                  {systemData ? `${systemData.cpu.count} core` : "-"}
                 </div>
               </div>
             </div>
@@ -410,7 +410,7 @@ export default function StatusPage() {
             <div className="relative p-6">
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-3 flex-1">
-                  <div className="text-xs font-semibold uppercase tracking-wider text-white/60">Memory</div>
+                  <div className="text-xs font-semibold uppercase tracking-wider text-white/60">Memori</div>
                   <div className="text-2xl font-bold text-white/90">
                     {systemData ? `${Math.round(systemData.memory.percentage)}%` : "-"}
                   </div>
@@ -446,8 +446,8 @@ export default function StatusPage() {
               <div className="mt-4">
                 <div className="text-xs text-white/60">
                   {networkSpeed?.download?.quality && networkSpeed.download.quality !== 'unknown' 
-                    ? `${networkSpeed.download.quality} quality`
-                    : networkSpeed?.ping.average ? `${Math.round(networkSpeed.ping.average)}ms ping` : "Testing..."}
+                    ? `kualitas ${networkSpeed.download.quality}`
+                    : networkSpeed?.ping.average ? `${Math.round(networkSpeed.ping.average)}ms ping` : "Lagi tes..."}
                 </div>
               </div>
             </div>
@@ -464,7 +464,7 @@ export default function StatusPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 shadow-lg shadow-blue-500/50" />
-                  <h3 className="text-sm font-semibold text-white/90 tracking-wide">Performance Metrics</h3>
+                  <h3 className="text-sm font-semibold text-white/90 tracking-wide">Metrik Performa</h3>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
@@ -473,7 +473,7 @@ export default function StatusPage() {
                   </div>
                   <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20">
                     <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                    <span className="text-xs text-white/60 font-medium">Memory</span>
+                    <span className="text-xs text-white/60 font-medium">Memori</span>
                   </div>
                 </div>
               </div>
@@ -519,14 +519,14 @@ export default function StatusPage() {
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-white/60">
-                    <span className="font-medium">Memory: </span>
+                    <span className="font-medium">Memori: </span>
                     <span className="text-purple-400 font-mono">
                       {systemData ? `${Math.round(systemData.memory.percentage)}%` : "-"}
                     </span>
                   </div>
                 </div>
                 <span className="text-white/40 font-mono">
-                  Updated: {health.lastCheckedAt ? health.lastCheckedAt.toLocaleTimeString("id-ID") : "-"}
+                  Update: {health.lastCheckedAt ? health.lastCheckedAt.toLocaleTimeString("id-ID") : "-"}
                 </span>
               </div>
             </div>
@@ -540,7 +540,7 @@ export default function StatusPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-gradient-to-r from-emerald-400 to-green-400 shadow-lg shadow-emerald-500/50" />
-                  <h3 className="text-sm font-semibold text-white/90 tracking-wide">System Info</h3>
+                  <h3 className="text-sm font-semibold text-white/90 tracking-wide">Info Sistem</h3>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10">
                   <span className="text-xs text-white/60 font-medium">Live</span>
@@ -593,7 +593,7 @@ export default function StatusPage() {
                 <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-orange-500/5 opacity-0 group-hover/item:opacity-100 transition-opacity duration-500" />
                 <div className="relative space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-white/50">Network</span>
+                    <span className="text-xs font-semibold uppercase tracking-wider text-white/50">Jaringan</span>
                     <Wifi className="w-4 h-4 text-amber-400" />
                   </div>
                   <div className="space-y-2">
@@ -604,7 +604,7 @@ export default function StatusPage() {
                           {iface.ipv4 || iface.ipv6 || "-"}
                         </div>
                       </div>
-                    )) || <div className="text-white/60">No interfaces</div>}
+                    )) || <div className="text-white/60">Gak ada interface</div>}
                   </div>
                 </div>
               </div>
@@ -622,7 +622,7 @@ export default function StatusPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-gradient-to-r from-emerald-400 to-green-400 shadow-lg shadow-emerald-500/50" />
-                  <h3 className="text-sm font-semibold text-white/90 tracking-wide">Server Health</h3>
+                  <h3 className="text-sm font-semibold text-white/90 tracking-wide">Kesehatan Server</h3>
                 </div>
               </div>
             </div>
@@ -638,14 +638,14 @@ export default function StatusPage() {
                       "bg-gradient-to-r from-gray-500 to-gray-600"
                     }`} />
                     <div className="text-base font-semibold text-white/90">
-                      {loading ? "Checking..." : health.status === "ok" ? "Online" : health.status === "fail" ? "Offline" : "Unknown"}
+                      {loading ? "Ngecek..." : health.status === "ok" ? "Online" : health.status === "fail" ? "Offline" : "Gak Tau"}
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="text-sm font-mono text-white/80">
                       {health.latency !== null ? `${health.latency} ms` : "-"}
                     </div>
-                    <div className="text-xs text-white/50">Latency</div>
+                    <div className="text-xs text-white/50">Latensi</div>
                   </div>
                 </div>
               </div>
@@ -655,7 +655,7 @@ export default function StatusPage() {
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 opacity-0 group-hover/chart:opacity-100 transition-opacity duration-500" />
                 <div className="relative">
                   <div className="flex items-center justify-between mb-3">
-                    <div className="text-xs font-semibold uppercase tracking-wider text-white/50">Response Time</div>
+                    <div className="text-xs font-semibold uppercase tracking-wider text-white/50">Waktu Respon</div>
                     <div className="text-xs text-white/60 font-mono">
                       Avg: {avgLatency !== null ? `${avgLatency} ms` : "-"}
                     </div>
@@ -663,14 +663,14 @@ export default function StatusPage() {
                   <div className="relative h-12 flex items-end gap-1">
                     {bars.length === 0 ? (
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-xs text-white/40 font-medium">No data</div>
+                        <div className="text-xs text-white/40 font-medium">Gak ada data</div>
                       </div>
                     ) : (
                       bars.map((b, i) => (
                         <div
                           key={i}
                           className="group/bar flex-1 rounded-t-sm transition-all duration-300 hover:scale-110 cursor-pointer"
-                          title={`${b.ms} ms - ${b.ok ? 'Success' : 'Failed'}`}
+                          title={`${b.ms} ms - ${b.ok ? 'Berhasil' : 'Gagal'}`}
                         >
                           <div
                             className={`w-full rounded-t-sm shadow-sm transition-all duration-500 ${
@@ -690,13 +690,13 @@ export default function StatusPage() {
               {/* Statistics */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-xl bg-gradient-to-r from-white/5 to-white/[0.02] border border-white/10 px-4 py-3 text-center">
-                  <div className="text-xs text-white/50 font-medium mb-1">Success Rate</div>
+                  <div className="text-xs text-white/50 font-medium mb-1">Tingkat Berhasil</div>
                   <div className="text-lg font-bold text-white/80">
                     {successRate !== null ? `${successRate}%` : "-"}
                   </div>
                 </div>
                 <div className="rounded-xl bg-gradient-to-r from-white/5 to-white/[0.02] border border-white/10 px-4 py-3 text-center">
-                  <div className="text-xs text-white/50 font-medium mb-1">Total Checks</div>
+                  <div className="text-xs text-white/50 font-medium mb-1">Total Cek</div>
                   <div className="text-lg font-bold text-white/80">
                     {totalChecks.toLocaleString()}
                   </div>
@@ -712,7 +712,7 @@ export default function StatusPage() {
             <div className="relative border-b border-white/10 bg-gradient-to-r from-gray-900/80 to-black/80 backdrop-blur-sm px-6 py-4">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 shadow-lg shadow-blue-500/50" />
-                <h3 className="text-sm font-semibold text-white/90 tracking-wide">Internet Speed</h3>
+                <h3 className="text-sm font-semibold text-white/90 tracking-wide">Kecepatan Internet</h3>
               </div>
             </div>
             <div className="flex-1 p-6 space-y-4">
@@ -728,7 +728,7 @@ export default function StatusPage() {
                     {networkSpeed?.download?.speed ? `${Math.round(networkSpeed.download.speed)} Mbps` : "-"}
                   </div>
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-white/60">Quality:</span>
+                    <span className="text-white/60">Kualitas:</span>
                     <span className={`font-medium capitalize ${
                       networkSpeed?.download?.quality === 'excellent' ? 'text-emerald-400' :
                       networkSpeed?.download?.quality === 'good' ? 'text-blue-400' :
@@ -754,7 +754,7 @@ export default function StatusPage() {
                     {networkSpeed?.upload?.speed ? `${Math.round(networkSpeed.upload.speed)} Mbps` : "-"}
                   </div>
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-white/60">Quality:</span>
+                    <span className="text-white/60">Kualitas:</span>
                     <span className={`font-medium capitalize ${
                       networkSpeed?.upload?.quality === 'excellent' ? 'text-emerald-400' :
                       networkSpeed?.upload?.quality === 'good' ? 'text-blue-400' :
@@ -773,7 +773,7 @@ export default function StatusPage() {
                 <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-orange-500/5 opacity-0 group-hover/ping:opacity-100 transition-opacity duration-500" />
                 <div className="relative space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-white/50">Ping Test</span>
+                    <span className="text-xs font-semibold uppercase tracking-wider text-white/50">Tes Ping</span>
                     <Signal className="w-4 h-4 text-amber-400" />
                   </div>
                   <div className="text-lg font-bold text-white/90">
@@ -784,10 +784,10 @@ export default function StatusPage() {
                       <div key={i} className="flex items-center justify-between text-xs">
                         <span className="text-white/60 font-mono">{result.host}</span>
                         <span className={`font-mono ${result.success ? 'text-emerald-400' : 'text-red-400'}`}>
-                          {result.success ? `${Math.round(result.time)}ms` : 'Failed'}
+                          {result.success ? `${Math.round(result.time)}ms` : 'Gagal'}
                         </span>
                       </div>
-                    )) || <div className="text-xs text-white/40">Testing...</div>}
+                    )) || <div className="text-xs text-white/40">Lagi tes...</div>}
                   </div>
                 </div>
               </div>
@@ -801,7 +801,7 @@ export default function StatusPage() {
             <div className="relative border-b border-white/10 bg-gradient-to-r from-gray-900/80 to-black/80 backdrop-blur-sm px-6 py-4">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-gradient-to-r from-violet-400 to-fuchsia-400 shadow-lg shadow-violet-500/50" />
-                <h3 className="text-sm font-semibold text-white/90 tracking-wide">System Resources</h3>
+                <h3 className="text-sm font-semibold text-white/90 tracking-wide">Resource Sistem</h3>
               </div>
             </div>
             <div className="flex-1 p-6 space-y-4">
@@ -824,7 +824,7 @@ export default function StatusPage() {
                       </span>
                     </div>
                     <div className="flex justify-between text-xs">
-                      <span className="text-white/60">System</span>
+                      <span className="text-white/60">Sistem</span>
                       <span className="text-white/80 font-mono">
                         {systemData ? `${Math.round(systemData.cpu.usage.system)}%` : "-"}
                       </span>
@@ -838,7 +838,7 @@ export default function StatusPage() {
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-pink-500/5 opacity-0 group-hover/mem:opacity-100 transition-opacity duration-500" />
                 <div className="relative space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-white/50">Memory</span>
+                    <span className="text-xs font-semibold uppercase tracking-wider text-white/50">Memori</span>
                     <MemoryStick className="w-4 h-4 text-purple-400" />
                   </div>
                   <div className="text-lg font-bold text-white/90">
@@ -846,13 +846,13 @@ export default function StatusPage() {
                   </div>
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs">
-                      <span className="text-white/60">Used</span>
+                      <span className="text-white/60">Terpakai</span>
                       <span className="text-white/80 font-mono">
                         {systemData ? formatBytes(systemData.memory.used) : "-"}
                       </span>
                     </div>
                     <div className="flex justify-between text-xs">
-                      <span className="text-white/60">Free</span>
+                      <span className="text-white/60">Kosong</span>
                       <span className="text-white/80 font-mono">
                         {systemData ? formatBytes(systemData.memory.free) : "-"}
                       </span>
@@ -902,17 +902,17 @@ export default function StatusPage() {
                         <span className="text-white/80 font-mono">{systemData.process.pid}</span>
                       </div>
                       <div className="flex justify-between text-xs">
-                        <span className="text-white/60">Version</span>
+                        <span className="text-white/60">Versi</span>
                         <span className="text-white/80 font-mono">{systemData.process.version}</span>
                       </div>
                       <div className="flex justify-between text-xs">
-                        <span className="text-white/60">Heap Used</span>
+                        <span className="text-white/60">Heap Terpakai</span>
                         <span className="text-white/80 font-mono">
                           {formatBytes(systemData.process.memory.heapUsed)}
                         </span>
                       </div>
                       <div className="flex justify-between text-xs">
-                        <span className="text-white/60">Process Uptime</span>
+                        <span className="text-white/60">Uptime Proses</span>
                         <span className="text-white/80 font-mono">
                           {formatUptime(systemData.process.uptime)}
                         </span>
