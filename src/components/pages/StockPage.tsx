@@ -27,6 +27,7 @@ export default function StockPage() {
   const [serverTimeIso, setServerTimeIso] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewSrc, setPreviewSrc] = useState<string | null>(null);
+  const [stockRangeFilter, setStockRangeFilter] = useState<string | null>(null);
 
   const fetchList = async () => {
     try {
@@ -115,9 +116,48 @@ export default function StockPage() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return items;
-    return items.filter((it) => [it.name, it.description, it.id].some((v) => (v || "").toString().toLowerCase().includes(q)));
-  }, [items, search]);
+    let base = items;
+    if (q) {
+      base = base.filter((it) => [it.name, it.description, it.id].some((v) => (v || "").toString().toLowerCase().includes(q)));
+    }
+    if (stockRangeFilter) {
+      const inFilter = (s: number) => {
+        if (stockRangeFilter === '0 - 100') return s >= 0 && s <= 100;
+        if (stockRangeFilter === '100 - 1000') return s > 100 && s <= 1000;
+        if (stockRangeFilter === '1000 - 10000') return s > 1000 && s <= 10000;
+        return true;
+      };
+      base = base.filter((it) => inFilter(Number(it.stock || 0)));
+    }
+    return base;
+  }, [items, search, stockRangeFilter]);
+
+  const summary = useMemo(() => {
+    let totalProducts = items.length;
+    let totalUnits = 0;
+    const ranges = [
+      { label: '0 - 100', min: 0, max: 100, includeMin: true, includeMax: true, units: 0, products: 0 },
+      { label: '100 - 1000', min: 100, max: 1000, includeMin: false, includeMax: true, units: 0, products: 0 },
+      { label: '1000 - 10000', min: 1000, max: 10000, includeMin: false, includeMax: true, units: 0, products: 0 },
+    ];
+    const inRange = (s: number, r: typeof ranges[number]) => {
+      const geMin = r.includeMin ? s >= r.min : s > r.min;
+      const leMax = r.includeMax ? s <= r.max : s < r.max;
+      return geMin && leMax;
+    };
+    for (const it of items) {
+      const s = Number(it.stock || 0);
+      totalUnits += isFinite(s) ? s : 0;
+      for (const r of ranges) {
+        if (inRange(s, r)) {
+          r.units += s;
+          r.products += 1;
+          break;
+        }
+      }
+    }
+    return { totalProducts, totalUnits, ranges };
+  }, [items]);
 
   function formatTimeWIBFromISO(iso?: string | null) {
     if (!iso) return "-";
@@ -213,47 +253,42 @@ export default function StockPage() {
 
         {/* Main Layout */}
         <div className="grid lg:grid-cols-[280px_1fr] gap-4 md:gap-6 flex-1 min-h-0">
-          {/* Filter Sidebar */}
+          {/* Summary Sidebar */}
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 flex flex-col gap-4 md:min-h-0 md:overflow-y-auto">
-            <div className="h-4 w-24 rounded bg-white/10 shrink-0" />
-            <div className="space-y-2 shrink-0">
-              <div className="h-9 rounded-xl border border-white/10 bg-white/5" />
-              <div className="h-9 rounded-xl border border-white/10 bg-white/5" />
-              <div className="h-9 rounded-xl border border-white/10 bg-white/5" />
+            <div>
+              <div className="text-sm font-semibold text-white/90">Ringkasan Stok</div>
+              <div className="mt-1 text-xs text-white/60">Total Produk: <span className="text-white/90">{summary.totalProducts}</span></div>
             </div>
-            <div className="h-px bg-white/10 shrink-0" />
-            <div className="h-4 w-20 rounded bg-white/10 shrink-0" />
-            <div className="space-y-2 shrink-0">
-              <div className="h-9 rounded-xl border border-white/10 bg-white/5" />
-              <div className="h-9 rounded-xl border border-white/10 bg-white/5" />
+            <div className="h-px bg-white/10" />
+            <div className="space-y-3">
+              {summary.ranges.map((r) => {
+                const active = stockRangeFilter === r.label;
+                return (
+                  <button
+                    key={r.label}
+                    type="button"
+                    onClick={() => setStockRangeFilter(active ? null : r.label)}
+                    className={`w-full text-left rounded-xl border p-3 transition ${active ? 'border-emerald-400/30 bg-emerald-500/5 ring-1 ring-emerald-400/40' : 'border-white/10 bg-white/5 hover:bg-white/8'}`}
+                  >
+                    <div className="flex items-center justify-between text-sm text-white/80">
+                      <div>{r.label}</div>
+                      <div className={`inline-flex items-center gap-1 text-xs rounded-md px-2 py-0.5 ${active ? 'text-white bg-emerald-500/30 border border-emerald-500/40' : 'text-emerald-200 bg-emerald-500/10 border border-emerald-500/20'}`}>{r.products}</div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
-            <div className="mt-auto flex gap-2 shrink-0">
-              <div className="h-10 flex-1 rounded-xl border border-white/10 bg-white/5" />
-              <div className="h-10 flex-1 rounded-xl border border-white/10 bg-white/5" />
+            <div className="flex items-center justify-between text-[11px] text-white/50 pt-1">
+              <div>Filter: {stockRangeFilter ? stockRangeFilter : 'Semua'}</div>
+              {stockRangeFilter ? (
+                <button type="button" onClick={() => setStockRangeFilter(null)} className="underline hover:text-white/80">Reset</button>
+              ) : <span />}
             </div>
+            <div className="mt-auto text-[11px] text-white/40" />
           </div>
 
           {/* Product Area */}
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] flex flex-col min-h-0">
-            {/* Toolbar */}
-            <div className="border-b border-white/10 px-4 md:px-6 py-3 flex items-center justify-between flex-wrap gap-2 shrink-0">
-              <div className="flex items-center gap-2">
-                <div className="w-28 h-9 rounded-xl border border-white/10 bg-white/5" />
-                <div className="w-28 h-9 rounded-xl border border-white/10 bg-white/5" />
-              </div>
-              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <div className="w-9 h-9 rounded-xl border border-white/10 bg-white/5" />
-                <div className="w-9 h-9 rounded-xl border border-white/10 bg-white/5" />
-                <button
-                  type="button"
-                  onClick={() => setAddOpen(true)}
-                  className="w-36 h-9 rounded-xl border border-white/10 bg-white/10 hover:bg-white/15 text-white text-sm"
-                >
-                  Tambahkan Sparepart
-                </button>
-              </div>
-            </div>
-
             {/* Grid Area (scrollable) */}
             <div className="flex-1 md:min-h-0 overflow-visible md:overflow-y-auto p-4 md:p-6">
               {loading ? (
@@ -289,19 +324,7 @@ export default function StockPage() {
               )}
             </div>
 
-            {/* Pagination (placeholder) */}
-            <div className="border-t border-white/10 px-4 md:px-6 py-3 flex items-center justify-between flex-wrap gap-2 shrink-0">
-              <div className="flex items-center gap-2">
-                <div className="w-20 h-9 rounded-xl border border-white/10 bg-white/5" />
-                <div className="w-20 h-9 rounded-xl border border-white/10 bg-white/5" />
-              </div>
-              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <div className="w-8 h-8 rounded-lg border border-white/10 bg-white/5" />
-                <div className="w-8 h-8 rounded-lg border border-white/10 bg-white/5" />
-                <div className="w-8 h-8 rounded-lg border border-white/10 bg-white/5" />
-                <div className="w-8 h-8 rounded-lg border border-white/10 bg-white/5" />
-              </div>
-            </div>
+            {/* No pagination footer; clean layout */}
           </div>
         </div>
       </div>
