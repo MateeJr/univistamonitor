@@ -35,4 +35,8 @@ export const ENDPOINTS = {
   workersDetailBase: `${SERVER_BASE}/api/workers`, // use: `${workersDetailBase}/${id}`
   workersDeleteBase: `${SERVER_BASE}/api/workers`, // use: `${workersDeleteBase}/${id}` (DELETE)
   workersStatusList: `${SERVER_BASE}/api/workers/statuslist`, // GET/POST/DELETE
+  // stock sparepart endpoints
+  stockList: `${SERVER_BASE}/api/stock`, // GET
+  stockCreate: `${SERVER_BASE}/api/stock`, // POST
+  stockFilesBase: `${SERVER_BASE}/files/stock`,
 };

@@ -1,21 +1,108 @@
+"use client";
+import React, { useEffect, useMemo, useState } from "react";
+import { ENDPOINTS } from "@/components/config/server";
+import AddSparepartModal, { NewSparepartPayload } from "@/components/modals/AddSparepartModal";
+import { Plus, RefreshCw } from "lucide-react";
+
+type StockItem = {
+  id: string;
+  name: string;
+  stock: number;
+  description?: string;
+  imageUrl?: string | null;
+  createdAt?: string | null;
+};
+
 export default function StockPage() {
+  const [search, setSearch] = useState("");
+  const [items, setItems] = useState<StockItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
+  const [adding, setAdding] = useState(false);
+
+  const fetchList = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch(ENDPOINTS.stockList);
+      const json = await res.json();
+      if (!res.ok || !json.ok) throw new Error(json.error || "Gagal memuat stock");
+      setItems(Array.isArray(json.items) ? json.items : []);
+    } catch (e: any) {
+      setError(e?.message || "Gagal memuat data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchList();
+    const id = setInterval(fetchList, 15000);
+    return () => clearInterval(id);
+  }, []);
+
+  const onAddSubmit = async (payload: NewSparepartPayload) => {
+    try {
+      setAdding(true);
+      const res = await fetch(ENDPOINTS.stockCreate, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) throw new Error(json.error || "Gagal menambah sparepart");
+      setAddOpen(false);
+      await fetchList();
+    } catch (e) {
+      alert("Gagal menambah sparepart");
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return items;
+    return items.filter((it) => [it.name, it.description, it.id].some((v) => (v || "").toString().toLowerCase().includes(q)));
+  }, [items, search]);
+
   return (
     <div className="px-4 md:px-6 pt-2 md:pt-4 pb-6 min-h-[calc(100dvh-80px)] md:h-[100dvh] overflow-visible md:overflow-hidden box-border">
       <div className="mx-auto w-full max-w-screen-2xl flex flex-col flex-1 min-h-0 h-full">
         {/* Top Bar */}
         <div className="mb-4 md:mb-6 flex items-center gap-3 flex-wrap shrink-0">
-          <div className="hidden md:block w-32 h-10 rounded-xl border border-white/10 bg-white/5" />
+          <button
+            type="button"
+            onClick={() => setAddOpen(true)}
+            className="hidden md:inline-flex items-center gap-2 h-10 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-sm font-semibold"
+          >
+            <Plus className="w-4 h-4" /> Tambahkan Sparepart
+          </button>
           <div className="relative w-full sm:flex-1 min-w-0">
             <input
               type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="Cari sparepart..."
               className="w-full h-10 pl-4 pr-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-all duration-300 text-sm"
             />
           </div>
-          <div className="hidden sm:flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl border border-white/10 bg-white/5" />
-            <div className="w-10 h-10 rounded-xl border border-white/10 bg-white/5" />
-            <div className="w-10 h-10 rounded-xl border border-white/10 bg-white/5" />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setAddOpen(true)}
+              className="sm:hidden inline-flex items-center gap-2 h-10 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-sm font-semibold"
+            >
+              <Plus className="w-4 h-4" /> Tambah
+            </button>
+            <button
+              type="button"
+              onClick={fetchList}
+              className="inline-flex items-center gap-2 h-10 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-sm font-semibold"
+            >
+              <RefreshCw className="w-4 h-4" /> Refresh
+            </button>
           </div>
         </div>
 
@@ -52,32 +139,49 @@ export default function StockPage() {
               <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                 <div className="w-9 h-9 rounded-xl border border-white/10 bg-white/5" />
                 <div className="w-9 h-9 rounded-xl border border-white/10 bg-white/5" />
-                <div className="w-24 h-9 rounded-xl border border-white/10 bg-white/5" />
+                <button
+                  type="button"
+                  onClick={() => setAddOpen(true)}
+                  className="w-36 h-9 rounded-xl border border-white/10 bg-white/10 hover:bg-white/15 text-white text-sm"
+                >
+                  Tambahkan Sparepart
+                </button>
               </div>
             </div>
 
             {/* Grid Area (scrollable) */}
             <div className="flex-1 md:min-h-0 overflow-visible md:overflow-y-auto p-4 md:p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="rounded-xl border border-white/10 bg-white/[0.03] p-3 flex flex-col">
-                    <div className="aspect-square rounded-lg border border-white/10 bg-white/5" />
-                    <div className="mt-3 space-y-2">
-                      <div className="h-3 w-4/5 rounded bg-white/10" />
-                      <div className="h-3 w-2/3 rounded bg-white/10" />
-                      <div className="h-3 w-1/2 rounded bg-white/10" />
+              {loading ? (
+                <div className="text-sm text-white/60">Memuat...</div>
+              ) : error ? (
+                <div className="text-sm text-rose-400">{error}</div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                  {filtered.map((it) => (
+                    <div key={it.id} className="rounded-xl border border-white/10 bg-white/[0.03] p-3 flex flex-col">
+                      <div className="aspect-square rounded-lg border border-white/10 bg-white/5 overflow-hidden">
+                        {it.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={it.imageUrl} alt={it.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-white/30 text-xs">Tidak ada gambar</div>
+                        )}
+                      </div>
+                      <div className="mt-3 space-y-1">
+                        <div className="text-white/90 font-semibold truncate">{it.name}</div>
+                        <div className="text-white/60 text-sm truncate">{it.description || '-'}</div>
+                      </div>
+                      <div className="mt-3 flex items-center gap-2">
+                        <span className="inline-flex items-center gap-2 h-6 px-2 rounded-lg bg-white/10 border border-white/10 text-white text-xs">Stok: {it.stock}</span>
+                        <span className="inline-flex items-center gap-2 h-6 px-2 rounded-lg bg-white/10 border border-white/10 text-white text-xs">ID: {it.id}</span>
+                      </div>
                     </div>
-                    <div className="mt-3 flex items-center gap-2">
-                      <div className="h-6 w-16 rounded-lg bg-white/10 border border-white/10" />
-                      <div className="h-6 w-20 rounded-lg bg-white/10 border border-white/10" />
-                    </div>
-                    <div className="mt-3 h-9 rounded-xl border border-white/10 bg-white/5" />
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Pagination */}
+            {/* Pagination (placeholder) */}
             <div className="border-t border-white/10 px-4 md:px-6 py-3 flex items-center justify-between flex-wrap gap-2 shrink-0">
               <div className="flex items-center gap-2">
                 <div className="w-20 h-9 rounded-xl border border-white/10 bg-white/5" />
@@ -93,6 +197,9 @@ export default function StockPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal */}
+      <AddSparepartModal visible={addOpen} onClose={() => setAddOpen(false)} onSubmit={onAddSubmit} submitting={adding} />
     </div>
   );
 }
