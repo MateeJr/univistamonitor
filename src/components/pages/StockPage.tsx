@@ -28,7 +28,13 @@ export default function StockPage() {
       const res = await fetch(ENDPOINTS.stockList);
       const json = await res.json();
       if (!res.ok || !json.ok) throw new Error(json.error || "Gagal memuat stock");
-      setItems(Array.isArray(json.items) ? json.items : []);
+      const list: StockItem[] = Array.isArray(json.items) ? json.items.map((it: any) => {
+        const url = typeof it.imageUrl === 'string' && it.imageUrl
+          ? (it.imageUrl.startsWith('http') ? it.imageUrl : `${ENDPOINTS.filesBase}${it.imageUrl}`)
+          : null;
+        return { id: String(it.id), name: String(it.name || ''), stock: Number(it.stock || 0), description: it.description || '', imageUrl: url, createdAt: it.createdAt || null } as StockItem;
+      }) : [];
+      setItems(list);
     } catch (e: any) {
       setError(e?.message || "Gagal memuat data");
     } finally {
@@ -158,22 +164,26 @@ export default function StockPage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   {filtered.map((it) => (
-                    <div key={it.id} className="rounded-xl border border-white/10 bg-white/[0.03] p-3 flex flex-col">
-                      <div className="aspect-square rounded-lg border border-white/10 bg-white/5 overflow-hidden">
+                    <div key={it.id} className="group rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] transition-colors p-3 flex flex-col">
+                      <div className="relative aspect-square rounded-lg border border-white/10 bg-white/5 overflow-hidden">
                         {it.imageUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={it.imageUrl} alt={it.name} className="w-full h-full object-cover" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-white/30 text-xs">Tidak ada gambar</div>
+                          <div className="w-full h-full flex flex-col items-center justify-center text-white/40 text-xs">
+                            <div className="h-10 w-10 rounded-md border border-white/10 bg-white/10 mb-2" />
+                            Tidak ada gambar
+                          </div>
                         )}
+                        <div className="pointer-events-none absolute inset-0 ring-0 group-hover:ring-1 group-hover:ring-white/10" />
                       </div>
                       <div className="mt-3 space-y-1">
                         <div className="text-white/90 font-semibold truncate">{it.name}</div>
                         <div className="text-white/60 text-sm truncate">{it.description || '-'}</div>
                       </div>
-                      <div className="mt-3 flex items-center gap-2">
-                        <span className="inline-flex items-center gap-2 h-6 px-2 rounded-lg bg-white/10 border border-white/10 text-white text-xs">Stok: {it.stock}</span>
-                        <span className="inline-flex items-center gap-2 h-6 px-2 rounded-lg bg-white/10 border border-white/10 text-white text-xs">ID: {it.id}</span>
+                      <div className="mt-3 flex items-center gap-2 flex-wrap">
+                        <span className="inline-flex items-center gap-2 h-6 px-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-200 text-xs">Stok: {it.stock}</span>
+                        <span className="inline-flex items-center gap-2 h-6 px-2 rounded-lg bg-white/5 border border-white/10 text-white/70 text-[11px]">ID: {it.id}</span>
                       </div>
                     </div>
                   ))}
