@@ -1,10 +1,11 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import type { SelectOption } from '@/components/modals/SelectModal';
 import { ENDPOINTS } from '@/components/config/server';
 import { Eye, Trash2 } from 'lucide-react';
 import ConfirmDeleteModal from '@/components/modals/ConfirmDeleteModal';
 import DetailFormViewer, { LaporanDetail } from '@/components/modals/DetailFormViewer';
+
+type SelectOption = { label: string; value: 'harian' | 'kerusakan'; description?: string };
 
 export default function MesinPage() {
   const [jenisOpen, setJenisOpen] = useState(false);
@@ -36,6 +37,8 @@ export default function MesinPage() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ jenis: 'harian' | 'kerusakan'; id: string } | null>(null);
   const [mobileTab, setMobileTab] = useState<'buat' | 'history'>('buat');
+  const [historyDate, setHistoryDate] = useState<string>('');
+  const [historyDateInput, setHistoryDateInput] = useState<string>('');
 
   const jenisOptions: SelectOption[] = [
     { label: 'Laporan Harian', value: 'harian', description: 'Laporan rutin harian mesin' },
@@ -87,10 +90,12 @@ export default function MesinPage() {
     });
   }
 
-  const fetchHistory = async () => {
+  const fetchHistory = async (d?: string) => {
     try {
       setHistoryLoading(true);
-      const res = await fetch(ENDPOINTS.laporanList);
+      const date = (d ?? historyDate) || '';
+      const url = date ? `${ENDPOINTS.laporanList}?date=${encodeURIComponent(date)}` : ENDPOINTS.laporanList;
+      const res = await fetch(url);
       const json = await res.json();
       if (res.ok && json.ok) setHistoryItems(json.items || []);
     } catch (e) {
@@ -101,10 +106,11 @@ export default function MesinPage() {
   };
 
   useEffect(() => {
-    fetchHistory();
-    const id = setInterval(fetchHistory, 15000);
+    if (!historyDate) return;
+    fetchHistory(historyDate);
+    const id = setInterval(() => fetchHistory(historyDate), 15000);
     return () => clearInterval(id);
-  }, []);
+  }, [historyDate]);
 
   // Format date helper: DD/MMM/YYYY (e.g., 13/Aug/2025)
   const monthShort = [
@@ -131,6 +137,8 @@ export default function MesinPage() {
         if (!canceled && res.ok && json && json.ok && typeof json.date === 'string') {
           // Only set if user hasn't typed anything yet
           setTanggalLaporan((prev) => prev || json.date);
+          setHistoryDate((prev) => prev || json.date);
+          setHistoryDateInput((prev) => prev || json.date);
         }
       } catch (e) {
         console.error(e);
@@ -421,7 +429,22 @@ export default function MesinPage() {
               <div className="min-h-0 h-full flex flex-col">
                 <div className="border border-white/20 rounded-xl min-h-0 h-full flex flex-col overflow-hidden">
                   <div className="border-b border-white/10 px-4 py-3 text-center text-white/70 font-semibold">HISTORY</div>
-                  <div className="flex-1 min-h-0 overflow-auto uv-scrollbar p-3">
+          <div className="flex-1 min-h-0 overflow-auto uv-scrollbar p-3">
+            <div className="mb-3 flex items-center gap-2">
+              <input
+                type="date"
+                value={historyDateInput}
+                onChange={(e) => setHistoryDateInput(e.target.value)}
+                className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => { setHistoryDate(historyDateInput); fetchHistory(historyDateInput); }}
+                className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/10 hover:bg-white/15 text-white px-3 py-2 text-sm"
+              >
+                Load
+              </button>
+            </div>
                     {historyLoading && (
                       <div className="text-center text-white/50 text-sm py-6">Memuat...</div>
                     )}
@@ -632,6 +655,21 @@ export default function MesinPage() {
           <div className="border border-white/20 rounded-xl min-h-0 h-full flex flex-col overflow-hidden">
             <div className="border-b border-white/10 px-4 py-3 text-center text-white/70 font-semibold">HISTORY</div>
             <div className="flex-1 min-h-0 overflow-auto uv-scrollbar p-3">
+              <div className="mb-3 flex items-center gap-2">
+                <input
+                  type="date"
+                  value={historyDateInput}
+                  onChange={(e) => setHistoryDateInput(e.target.value)}
+                  className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => { setHistoryDate(historyDateInput); fetchHistory(historyDateInput); }}
+                  className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/10 hover:bg-white/15 text-white px-3 py-2 text-sm"
+                >
+                  Load
+                </button>
+              </div>
               {historyLoading && (
                 <div className="text-center text-white/50 text-sm py-6">Memuat...</div>
               )}
