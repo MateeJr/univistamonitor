@@ -1,42 +1,54 @@
 // Centralized server configuration for web frontend
 // Adjust host/port here to point the app to the correct backend
 
-export const SERVER_HOST = "192.168.18.4";
-export const SERVER_PORT = 4000;
+// Keep absolute base for server-side internal use (Next API routes, etc.)
+export const SERVER_HOST = process.env.NEXT_PUBLIC_SERVER_HOST || "192.168.18.4";
+export const SERVER_PORT = process.env.NEXT_PUBLIC_SERVER_PORT || "4000";
 export const SERVER_BASE = `http://${SERVER_HOST}:${SERVER_PORT}`;
+
+// When deployed on Vercel (HTTPS) browsers cannot call http:// targets directly.
+// Enable a proxy mode so the frontend uses relative URLs that are rewritten by Next.js.
+// Heuristics: opt-in via NEXT_PUBLIC_USE_PROXY=1, or when on Vercel, or when window is https:
+const USE_PROXY =
+  (typeof window !== "undefined" && typeof window.location !== "undefined" && window.location.protocol === "https:") ||
+  process.env.NEXT_PUBLIC_USE_PROXY === "1" ||
+  process.env.VERCEL === "1";
+
+// Base for public endpoints used by the browser
+const PUBLIC_BASE = USE_PROXY ? "" : SERVER_BASE;
 
 export const ENDPOINTS = {
   // frontend-scoped endpoints
-  login: `${SERVER_BASE}/frontend/auth/login`,
-  logout: `${SERVER_BASE}/frontend/auth/logout`,
-  accounts: `${SERVER_BASE}/frontend/auth/accounts`,
-  logininfo: `${SERVER_BASE}/frontend/api/logininfo`,
+  login: `${PUBLIC_BASE}/frontend/auth/login`,
+  logout: `${PUBLIC_BASE}/frontend/auth/logout`,
+  accounts: `${PUBLIC_BASE}/frontend/auth/accounts`,
+  logininfo: `${PUBLIC_BASE}/frontend/api/logininfo`,
   // shared endpoints
-  health: `${SERVER_BASE}/health`,
-  time: `${SERVER_BASE}/api/time`,
+  health: `${PUBLIC_BASE}/health`,
+  time: `${PUBLIC_BASE}/api/time`,
   // system monitoring endpoints
-  systemCpu: `${SERVER_BASE}/api/system/cpu`,
-  systemMemory: `${SERVER_BASE}/api/system/memory`,
-  systemNetwork: `${SERVER_BASE}/api/system/network`,
-  systemInfo: `${SERVER_BASE}/api/system/info`,
-  systemProcess: `${SERVER_BASE}/api/system/process`,
-  networkSpeed: `${SERVER_BASE}/api/network/speed`,
-  networkPing: `${SERVER_BASE}/api/network/ping`,
-  systemStatus: `${SERVER_BASE}/api/system/status`,
+  systemCpu: `${PUBLIC_BASE}/api/system/cpu`,
+  systemMemory: `${PUBLIC_BASE}/api/system/memory`,
+  systemNetwork: `${PUBLIC_BASE}/api/system/network`,
+  systemInfo: `${PUBLIC_BASE}/api/system/info`,
+  systemProcess: `${PUBLIC_BASE}/api/system/process`,
+  networkSpeed: `${PUBLIC_BASE}/api/network/speed`,
+  networkPing: `${PUBLIC_BASE}/api/network/ping`,
+  systemStatus: `${PUBLIC_BASE}/api/system/status`,
   // laporan endpoints
-  laporanSubmit: `${SERVER_BASE}/api/laporan/submit`,
-  laporanList: `${SERVER_BASE}/api/laporan/list`,
-  laporanDetailBase: `${SERVER_BASE}/api/laporan/detail`, // use: `${laporanDetailBase}/${jenis}/${id}`
-  laporanDeleteBase: `${SERVER_BASE}/api/laporan`, // use: `${laporanDeleteBase}/${jenis}/${id}` (DELETE)
-  filesBase: `${SERVER_BASE}`, // prefix for file URLs returned by server (e.g. /files/laporan/...)
+  laporanSubmit: `${PUBLIC_BASE}/api/laporan/submit`,
+  laporanList: `${PUBLIC_BASE}/api/laporan/list`,
+  laporanDetailBase: `${PUBLIC_BASE}/api/laporan/detail`, // use: `${laporanDetailBase}/${jenis}/${id}`
+  laporanDeleteBase: `${PUBLIC_BASE}/api/laporan`, // use: `${laporanDeleteBase}/${jenis}/${id}` (DELETE)
+  filesBase: `${PUBLIC_BASE}`, // prefix for file URLs returned by server (e.g. /files/laporan/...)
   // workers endpoints
-  workersList: `${SERVER_BASE}/api/workers`, // GET
-  workersCreate: `${SERVER_BASE}/api/workers`, // POST
-  workersDetailBase: `${SERVER_BASE}/api/workers`, // use: `${workersDetailBase}/${id}`
-  workersDeleteBase: `${SERVER_BASE}/api/workers`, // use: `${workersDeleteBase}/${id}` (DELETE)
-  workersStatusList: `${SERVER_BASE}/api/workers/statuslist`, // GET/POST/DELETE
+  workersList: `${PUBLIC_BASE}/api/workers`, // GET
+  workersCreate: `${PUBLIC_BASE}/api/workers`, // POST
+  workersDetailBase: `${PUBLIC_BASE}/api/workers`, // use: `${workersDetailBase}/${id}`
+  workersDeleteBase: `${PUBLIC_BASE}/api/workers`, // use: `${workersDeleteBase}/${id}` (DELETE)
+  workersStatusList: `${PUBLIC_BASE}/api/workers/statuslist`, // GET/POST/DELETE
   // stock sparepart endpoints
-  stockList: `${SERVER_BASE}/api/stock`, // GET
-  stockCreate: `${SERVER_BASE}/api/stock`, // POST
-  stockFilesBase: `${SERVER_BASE}/files/stock`,
+  stockList: `${PUBLIC_BASE}/api/stock`, // GET
+  stockCreate: `${PUBLIC_BASE}/api/stock`, // POST
+  stockFilesBase: `${PUBLIC_BASE}/files/stock`,
 };
