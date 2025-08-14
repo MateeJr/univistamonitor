@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
 
 // Read backend target from env. Defaults match src/components/config/server.ts
-const SERVER_HOST = process.env.NEXT_PUBLIC_SERVER_HOST || "192.168.18.4";
-const SERVER_PORT = process.env.NEXT_PUBLIC_SERVER_PORT || "4000";
+const SERVER_HOST = process.env.NEXT_PUBLIC_SERVER_HOST || "145.239.65.119";
+const SERVER_PORT = process.env.NEXT_PUBLIC_SERVER_PORT || "20070";
 const TARGET = `http://${SERVER_HOST}:${SERVER_PORT}`;
 
 const nextConfig: NextConfig = {

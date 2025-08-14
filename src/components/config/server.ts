@@ -2,8 +2,8 @@
 // Adjust host/port here to point the app to the correct backend
 
 // Keep absolute base for server-side internal use (Next API routes, etc.)
-export const SERVER_HOST = process.env.NEXT_PUBLIC_SERVER_HOST || "192.168.18.4";
-export const SERVER_PORT = process.env.NEXT_PUBLIC_SERVER_PORT || "4000";
+export const SERVER_HOST = process.env.NEXT_PUBLIC_SERVER_HOST || "145.239.65.119";
+export const SERVER_PORT = process.env.NEXT_PUBLIC_SERVER_PORT || "20070";
 export const SERVER_BASE = `http://${SERVER_HOST}:${SERVER_PORT}`;
 
 // When deployed on Vercel (HTTPS) browsers cannot call http:// targets directly.
