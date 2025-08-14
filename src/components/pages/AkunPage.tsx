@@ -568,11 +568,7 @@ const UserList: React.FC = () => (
               {filteredUserAccounts.map((it, idx) => (
                 <div
                   key={`${it.name || "user"}-${idx}`}
-                  className={`group rounded-lg border p-3 transition-all duration-200 hover:bg-zinc-800/40 ${
-                    it.online 
-                      ? "border-emerald-500/30 bg-emerald-500/5" 
-                      : "border-zinc-800/50 bg-zinc-800/20"
-                  }`}
+                  className="group rounded-lg border border-zinc-800/50 bg-zinc-800/20 p-3 transition-all duration-200 hover:bg-zinc-800/40"
                 >
                   <div className="flex items-start justify-between">
                     <div className="min-w-0 flex-1">
@@ -581,7 +577,6 @@ const UserList: React.FC = () => (
                       </div>
                       <div className="mt-1 text-xs text-zinc-400">
                         <span className={`inline-flex items-center gap-1 ${it.status === "logged-in" ? "text-emerald-400" : "text-zinc-300"}`}>
-                          <StatusDot online={!!it.online} />
                           {it.status || "-"}
                         </span>
                         <span className="mx-2 text-zinc-600">•</span>
@@ -595,9 +590,6 @@ const UserList: React.FC = () => (
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`text-xs font-medium ${it.online ? "text-emerald-400" : "text-zinc-400"}`}>
-                        {it.online ? "Online" : "Offline"}
-                      </span>
                       <button
                         type="button"
                         onClick={() => setDeleteCandidate(it.name || "")}
