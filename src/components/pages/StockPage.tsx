@@ -5,7 +5,7 @@ import AddSparepartModal, { NewSparepartPayload } from "@/components/modals/AddS
 import SparepartDetailModal, { SparepartDetail } from "@/components/modals/SparepartDetailModal";
 import ImagePreviewModal from "@/components/modals/ImagePreviewModal";
 import ConfirmDeleteProductModal from "@/components/modals/ConfirmDeleteProductModal";
-import { Plus, RefreshCw } from "lucide-react";
+import { Plus, RefreshCw, PlusCircle, MinusCircle } from "lucide-react";
 
 type StockItem = {
   id: string;
@@ -14,6 +14,15 @@ type StockItem = {
   description?: string;
   imageUrl?: string | null;
   createdAt?: string | null;
+  lastChange?: {
+    at?: string;
+    by?: string;
+    reason?: string;
+    tujuan?: string;
+    from?: number;
+    to?: number;
+    delta?: number;
+  } | null;
 };
 
 export default function StockPage() {
@@ -45,7 +54,15 @@ export default function StockPage() {
         const url = typeof it.imageUrl === 'string' && it.imageUrl
           ? (it.imageUrl.startsWith('http') ? it.imageUrl : `${ENDPOINTS.filesBase}${it.imageUrl}`)
           : null;
-        return { id: String(it.id), name: String(it.name || ''), stock: Number(it.stock || 0), description: it.description || '', imageUrl: url, createdAt: it.createdAt || null } as StockItem;
+        return {
+          id: String(it.id),
+          name: String(it.name || ''),
+          stock: Number(it.stock || 0),
+          description: it.description || '',
+          imageUrl: url,
+          createdAt: it.createdAt || null,
+          lastChange: it.lastChange || null,
+        } as StockItem;
       }) : [];
       setItems(list);
       if (timeRes && (timeRes as Response).ok) {
@@ -100,7 +117,7 @@ export default function StockPage() {
     }
   };
 
-  const saveSparepart = async (payload: { id: string; name: string; stock: number; description?: string; imageDataUrl?: string | null }) => {
+  const saveSparepart = async (payload: { id: string; name: string; stock: number; description?: string; imageDataUrl?: string | null; changedBy?: string; changeTujuan?: string }) => {
     try {
       const res = await fetch(`${ENDPOINTS.stockCreate}/${payload.id}`, {
         method: 'PATCH',
@@ -312,12 +329,40 @@ export default function StockPage() {
                             Tidak ada gambar
                           </div>
                         )}
+                        {!!it.lastChange && typeof it.lastChange?.delta === 'number' ? (
+                          <div className="absolute top-2 right-2 z-10">
+                            {it.lastChange.delta > 0 ? (
+                              <span title="Penambahan stok" className="inline-flex items-center gap-1 rounded-full bg-emerald-900/60 border border-emerald-500/50 text-emerald-200 px-2 py-1 text-[11px]">
+                                <PlusCircle className="w-3.5 h-3.5" />
+                                +{it.lastChange.delta}
+                              </span>
+                            ) : it.lastChange.delta < 0 ? (
+                              <span title="Pengurangan stok" className="inline-flex items-center gap-1 rounded-full bg-rose-900/60 border border-rose-500/50 text-rose-200 px-2 py-1 text-[11px]">
+                                <MinusCircle className="w-3.5 h-3.5" />
+                                {it.lastChange.delta}
+                              </span>
+                            ) : null}
+                          </div>
+                        ) : null}
                         <div className="pointer-events-none absolute inset-0 ring-0 group-hover:ring-1 group-hover:ring-white/10" />
                       </div>
                       <div className="mt-3 space-y-1">
                         <div className="flex items-center justify-between gap-2 min-w-0">
                           <div className="text-white/90 font-semibold truncate">{it.name}</div>
-                          <span className="shrink-0 inline-flex items-center gap-1 h-5 px-2 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-200 text-[11px]">Stok: {it.stock}</span>
+                          <div className="shrink-0 flex items-center gap-2">
+                            <span className="inline-flex items-center gap-1 h-5 px-2 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-200 text-[11px]">Stok: {it.stock}</span>
+                            {!!it.lastChange && typeof it.lastChange.delta === 'number' && it.lastChange.delta !== 0 ? (
+                              it.lastChange.delta > 0 ? (
+                                <span title="Penambahan terbaru" className="inline-flex items-center gap-1 h-5 px-2 rounded-md bg-emerald-900/60 border border-emerald-500/50 text-emerald-200 text-[11px]">
+                                  <PlusCircle className="w-3.5 h-3.5" /> +{it.lastChange.delta}
+                                </span>
+                              ) : (
+                                <span title="Pengurangan terbaru" className="inline-flex items-center gap-1 h-5 px-2 rounded-md bg-rose-900/60 border border-rose-500/50 text-rose-200 text-[11px]">
+                                  <MinusCircle className="w-3.5 h-3.5" /> {it.lastChange.delta}
+                                </span>
+                              )
+                            ) : null}
+                          </div>
                         </div>
                         <div className="text-white/60 text-sm truncate">{it.description || '-'}</div>
                       </div>
@@ -343,6 +388,7 @@ export default function StockPage() {
           onClose={() => { setDetailOpen(false); setDetailData(null); }}
           onDelete={(id) => { setConfirmDeleteOpen(true); }}
           onSave={saveSparepart}
+          serverTimeIso={serverTimeIso}
         />
       ) : null}
       {confirmDeleteOpen && detailData ? (

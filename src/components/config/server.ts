@@ -50,5 +50,6 @@ export const ENDPOINTS = {
   // stock sparepart endpoints
   stockList: `${PUBLIC_BASE}/api/stock`, // GET
   stockCreate: `${PUBLIC_BASE}/api/stock`, // POST
+  stockDetailBase: `${PUBLIC_BASE}/api/stock`, // use: `${stockDetailBase}/${id}` (GET)
   stockFilesBase: `${PUBLIC_BASE}/files/stock`,
 };
