@@ -5,7 +5,7 @@ import AddSparepartModal, { NewSparepartPayload } from "@/components/modals/AddS
 import SparepartDetailModal, { SparepartDetail } from "@/components/modals/SparepartDetailModal";
 import ImagePreviewModal from "@/components/modals/ImagePreviewModal";
 import ConfirmDeleteProductModal from "@/components/modals/ConfirmDeleteProductModal";
-import { Plus, RefreshCw, PlusCircle, MinusCircle } from "lucide-react";
+import { Plus, RefreshCw, PlusCircle, MinusCircle, FileDown } from "lucide-react";
 
 type StockItem = {
   id: string;
@@ -39,6 +39,7 @@ export default function StockPage() {
   const [previewSrc, setPreviewSrc] = useState<string | null>(null);
   const [stockRangeFilter, setStockRangeFilter] = useState<string | null>(null);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [generatingPdf, setGeneratingPdf] = useState(false);
 
   const fetchList = async () => {
     try {
@@ -114,6 +115,47 @@ export default function StockPage() {
       setConfirmDeleteOpen(false);
     } catch (e) {
       alert('Gagal menghapus sparepart');
+    }
+  };
+
+  const generateMonthlyPdf = async () => {
+    try {
+      setGeneratingPdf(true);
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
+      
+      const res = await fetch(`${ENDPOINTS.stockList}/monthly-report?year=${year}&month=${month}`, {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ year, month })
+      });
+      
+      if (!res.ok) {
+        throw new Error('Gagal generate laporan');
+      }
+      
+      const htmlContent = await res.text();
+      
+      // Open the report in a new window
+      const newWindow = window.open('', '_blank');
+      if (newWindow) {
+        newWindow.document.write(htmlContent);
+        newWindow.document.close();
+        
+        // Add print functionality and instructions
+        setTimeout(() => {
+          newWindow.focus();
+          alert('Laporan berhasil dibuat! Gunakan Ctrl+P (atau Cmd+P) untuk print/save as PDF.');
+        }, 500);
+      } else {
+        throw new Error('Popup diblokir. Mohon ijinkan popup untuk website ini.');
+      }
+      
+    } catch (e: any) {
+      alert(e?.message || 'Gagal generate laporan');
+    } finally {
+      setGeneratingPdf(false);
     }
   };
 
@@ -264,6 +306,15 @@ export default function StockPage() {
               className="inline-flex items-center gap-2 h-10 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-sm font-semibold"
             >
               <RefreshCw className="w-4 h-4" /> Refresh
+            </button>
+            <button
+              type="button"
+              onClick={generateMonthlyPdf}
+              disabled={generatingPdf}
+              className="inline-flex items-center gap-2 h-10 px-3 rounded-xl bg-emerald-600/80 hover:bg-emerald-600 disabled:bg-gray-600/50 border border-emerald-500/50 disabled:border-gray-500/50 text-white text-sm font-semibold disabled:cursor-not-allowed transition-all"
+            >
+              <FileDown className="w-4 h-4" />
+              {generatingPdf ? 'Generating...' : 'PDF Bulanan'}
             </button>
             <div className="hidden md:flex items-center h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-xs text-white/70">
               Terakhir diupdate: <span className="ml-1 text-white/90">{lastUpdatedLabel}</span>
