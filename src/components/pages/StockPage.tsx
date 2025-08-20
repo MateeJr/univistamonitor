@@ -378,11 +378,21 @@ export default function StockPage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   {filtered.map((it) => (
-                    <button key={it.id} type="button" onClick={() => { setDetailData(it as SparepartDetail); setDetailOpen(true); }} className="text-left group rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] transition-colors p-3 flex flex-col">
-                      <div className="relative aspect-square rounded-lg border border-white/10 bg-white/5 overflow-hidden">
+                    <button
+                      key={it.id}
+                      type="button"
+                      onClick={() => { setDetailData(it as SparepartDetail); setDetailOpen(true); }}
+                      className="text-left group rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] transition-colors p-3 flex flex-col h-full"
+                    >
+                      <div className="relative w-full h-44 sm:h-48 md:h-56 xl:h-60 rounded-lg border border-white/10 bg-white/5 overflow-hidden">
                         {it.imageUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={it.imageUrl} alt={it.name} className="w-full h-full object-cover cursor-zoom-in" onClick={(e) => { e.stopPropagation(); setPreviewSrc(it.imageUrl!); setPreviewOpen(true); }} />
+                          <img
+                            src={it.imageUrl}
+                            alt={it.name}
+                            className="w-full h-full object-cover object-center cursor-zoom-in"
+                            onClick={(e) => { e.stopPropagation(); setPreviewSrc(it.imageUrl!); setPreviewOpen(true); }}
+                          />
                         ) : (
                           <div className="w-full h-full flex flex-col items-center justify-center text-white/40 text-xs">
                             <div className="h-10 w-10 rounded-md border border-white/10 bg-white/10 mb-2" />
@@ -410,9 +420,14 @@ export default function StockPage() {
                         ) : null}
                         <div className="pointer-events-none absolute inset-0 ring-0 group-hover:ring-1 group-hover:ring-white/10" />
                       </div>
-                      <div className="mt-3 space-y-1">
+                      <div className="mt-3 space-y-1 min-h-[4.25rem]">
                         <div className="flex items-center justify-between gap-2 min-w-0">
-                          <div className="flex-1 min-w-0 text-white/90 font-semibold whitespace-normal break-words leading-snug">{it.name}</div>
+                          <div
+                            className="flex-1 min-w-0 text-white/90 font-semibold whitespace-normal break-words leading-snug"
+                            style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+                          >
+                            {it.name}
+                          </div>
                           <div className="shrink-0 flex items-center gap-2">
                             {!!it.lastChange && typeof it.lastChange.delta === 'number' && it.lastChange.delta !== 0 ? (
                               it.lastChange.delta > 0 ? (

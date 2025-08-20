@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import PresenceManager from "@/components/presence/PresenceManager";
 import NavBarClient from "@/components/NavBarClient";
+import VersionUI from "@/components/VersionUI";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,6 +30,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-[#ededed] min-h-[100dvh] overflow-x-hidden`}>
         <NavBarClient />
         <PresenceManager />
+        <VersionUI />
         <div className="pt-[80px] md:pt-0 md:pl-[96px] box-border overflow-x-hidden">
           {children}
         </div>
