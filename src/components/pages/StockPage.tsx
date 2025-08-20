@@ -40,10 +40,15 @@ export default function StockPage() {
   const [stockRangeFilter, setStockRangeFilter] = useState<string | null>(null);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [generatingPdf, setGeneratingPdf] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const fetchList = async () => {
+  const fetchList = async (isRefetch: boolean = false) => {
     try {
-      setLoading(true);
+      if (isRefetch) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
       setError(null);
       const [res, timeRes] = await Promise.all([
         fetch(ENDPOINTS.stockList),
@@ -75,13 +80,17 @@ export default function StockPage() {
     } catch (e: any) {
       setError(e?.message || "Gagal memuat data");
     } finally {
-      setLoading(false);
+      if (isRefetch) {
+        setRefreshing(false);
+      } else {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    fetchList();
-    const id = setInterval(fetchList, 60000);
+    fetchList(false);
+    const id = setInterval(() => fetchList(true), 60000);
     return () => clearInterval(id);
   }, []);
 
@@ -96,7 +105,7 @@ export default function StockPage() {
       const json = await res.json();
       if (!res.ok || !json.ok) throw new Error(json.error || "Gagal menambah sparepart");
       setAddOpen(false);
-      await fetchList();
+      await fetchList(true);
     } catch (e) {
       alert("Gagal menambah sparepart");
     } finally {
@@ -109,7 +118,7 @@ export default function StockPage() {
       const res = await fetch(`${ENDPOINTS.stockCreate}/${id}`, { method: 'DELETE' });
       const json = await res.json();
       if (!res.ok || !json.ok) throw new Error(json.error || 'Gagal menghapus');
-      await fetchList();
+      await fetchList(true);
       setDetailOpen(false);
       setDetailData(null);
       setConfirmDeleteOpen(false);
@@ -168,7 +177,7 @@ export default function StockPage() {
       });
       const json = await res.json();
       if (!res.ok || !json.ok) throw new Error(json.error || 'Gagal menyimpan');
-      await fetchList();
+      await fetchList(true);
       setDetailOpen(false);
       setDetailData(null);
     } catch (e) {
@@ -302,10 +311,10 @@ export default function StockPage() {
             </button>
             <button
               type="button"
-              onClick={fetchList}
+              onClick={() => fetchList(true)}
               className="inline-flex items-center gap-2 h-10 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-sm font-semibold"
             >
-              <RefreshCw className="w-4 h-4" /> Refresh
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} /> {refreshing ? 'Refreshing' : 'Refresh'}
             </button>
             <button
               type="button"
