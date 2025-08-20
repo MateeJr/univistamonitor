@@ -81,7 +81,7 @@ export default function StockPage() {
 
   useEffect(() => {
     fetchList();
-    const id = setInterval(fetchList, 15000);
+    const id = setInterval(fetchList, 60000);
     return () => clearInterval(id);
   }, []);
 
@@ -380,6 +380,10 @@ export default function StockPage() {
                             Tidak ada gambar
                           </div>
                         )}
+                        {/* Stock badge pinned to top-left of the frame */}
+                        <div className="absolute top-2 left-2 z-10">
+                          <span className="inline-flex items-center gap-1 rounded-md bg-emerald-600 border border-emerald-500 text-white px-2 py-1 text-[11px] shadow-md">Stok: {it.stock}</span>
+                        </div>
                         {!!it.lastChange && typeof it.lastChange?.delta === 'number' ? (
                           <div className="absolute top-2 right-2 z-10">
                             {it.lastChange.delta > 0 ? (
@@ -399,9 +403,8 @@ export default function StockPage() {
                       </div>
                       <div className="mt-3 space-y-1">
                         <div className="flex items-center justify-between gap-2 min-w-0">
-                          <div className="text-white/90 font-semibold truncate">{it.name}</div>
+                          <div className="flex-1 min-w-0 text-white/90 font-semibold whitespace-normal break-words leading-snug">{it.name}</div>
                           <div className="shrink-0 flex items-center gap-2">
-                            <span className="inline-flex items-center gap-1 h-5 px-2 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-200 text-[11px]">Stok: {it.stock}</span>
                             {!!it.lastChange && typeof it.lastChange.delta === 'number' && it.lastChange.delta !== 0 ? (
                               it.lastChange.delta > 0 ? (
                                 <span title="Penambahan terbaru" className="inline-flex items-center gap-1 h-5 px-2 rounded-md bg-emerald-900/60 border border-emerald-500/50 text-emerald-200 text-[11px]">
