@@ -301,20 +301,20 @@ export default function StockPage() {
               className="w-full h-10 pl-4 pr-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-all duration-300 text-sm"
             />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               type="button"
               onClick={() => setAddOpen(true)}
               className="sm:hidden inline-flex items-center gap-2 h-10 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-sm font-semibold"
             >
-              <Plus className="w-4 h-4" /> Tambah
+              <Plus className="w-4 h-4" /> <span className="hidden xs:inline">Tambah</span>
             </button>
             <button
               type="button"
               onClick={() => fetchList(true)}
               className="inline-flex items-center gap-2 h-10 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-sm font-semibold"
             >
-              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} /> {refreshing ? 'Refreshing' : 'Refresh'}
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} /> <span className="hidden xs:inline">{refreshing ? 'Refreshing' : 'Refresh'}</span>
             </button>
             <button
               type="button"
@@ -323,18 +323,18 @@ export default function StockPage() {
               className="inline-flex items-center gap-2 h-10 px-3 rounded-xl bg-emerald-600/80 hover:bg-emerald-600 disabled:bg-gray-600/50 border border-emerald-500/50 disabled:border-gray-500/50 text-white text-sm font-semibold disabled:cursor-not-allowed transition-all"
             >
               <FileDown className="w-4 h-4" />
-              {generatingPdf ? 'Generating...' : 'PDF Bulanan'}
+              <span className="hidden xs:inline">{generatingPdf ? 'Generating...' : 'PDF Bulanan'}</span>
             </button>
-            <div className="hidden md:flex items-center h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-xs text-white/70">
+            <div className="hidden lg:flex items-center h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-xs text-white/70 whitespace-nowrap">
               Terakhir diupdate: <span className="ml-1 text-white/90">{lastUpdatedLabel}</span>
             </div>
           </div>
         </div>
 
         {/* Main Layout */}
-        <div className="grid lg:grid-cols-[280px_1fr] gap-4 md:gap-6 flex-1 min-h-0">
+        <div className="grid lg:grid-cols-[280px_1fr] gap-4 md:gap-6 flex-1 min-h-0 overflow-hidden">
           {/* Summary Sidebar */}
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 flex flex-col gap-4 md:min-h-0 md:overflow-y-auto">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 flex flex-col gap-4 md:min-h-0 md:overflow-y-auto overflow-hidden">
             <div>
               <div className="text-sm font-semibold text-white/90">Ringkasan Stok</div>
               <div className="mt-1 text-xs text-white/60">Total Produk: <span className="text-white/90">{summary.totalProducts}</span></div>
@@ -376,13 +376,13 @@ export default function StockPage() {
               ) : error ? (
                 <div className="text-sm text-rose-400">{error}</div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 auto-rows-min">
                   {filtered.map((it) => (
                     <button
                       key={it.id}
                       type="button"
                       onClick={() => { setDetailData(it as SparepartDetail); setDetailOpen(true); }}
-                      className="text-left group rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] transition-colors p-3 flex flex-col h-full"
+                      className="text-left group rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] transition-colors p-3 flex flex-col h-full overflow-hidden"
                     >
                       <div className="relative w-full h-44 sm:h-48 md:h-56 xl:h-60 rounded-lg border border-white/10 bg-white/5 overflow-hidden">
                         {it.imageUrl ? (
@@ -400,49 +400,60 @@ export default function StockPage() {
                           </div>
                         )}
                         {/* Stock badge pinned to top-left of the frame */}
-                        <div className="absolute top-2 left-2 z-10">
-                          <span className="inline-flex items-center gap-1 rounded-md bg-emerald-600 border border-emerald-500 text-white px-2 py-1 text-[11px] shadow-md">Stok: {it.stock}</span>
+                        <div className="absolute top-2 left-2 z-10 max-w-[calc(100%-1rem)]">
+                          <span className="inline-flex items-center gap-1 rounded-md bg-emerald-600 border border-emerald-500 text-white px-2 py-1 text-[11px] shadow-md whitespace-nowrap overflow-hidden text-ellipsis max-w-full">
+                            <span className="truncate">Stok: {it.stock}</span>
+                          </span>
                         </div>
                         {!!it.lastChange && typeof it.lastChange?.delta === 'number' ? (
-                          <div className="absolute top-2 right-2 z-10">
+                          <div className="absolute top-2 right-2 z-10 max-w-[calc(50%-0.75rem)]">
                             {it.lastChange.delta > 0 ? (
-                              <span title="Penambahan stok" className="inline-flex items-center gap-1 rounded-full bg-emerald-900/60 border border-emerald-500/50 text-emerald-200 px-2 py-1 text-[11px]">
-                                <PlusCircle className="w-3.5 h-3.5" />
-                                +{it.lastChange.delta}
+                              <span title="Penambahan stok" className="inline-flex items-center gap-1 rounded-full bg-emerald-900/60 border border-emerald-500/50 text-emerald-200 px-2 py-1 text-[11px] whitespace-nowrap overflow-hidden text-ellipsis max-w-full">
+                                <PlusCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                                <span className="truncate">+{it.lastChange.delta}</span>
                               </span>
                             ) : it.lastChange.delta < 0 ? (
-                              <span title="Pengurangan stok" className="inline-flex items-center gap-1 rounded-full bg-rose-900/60 border border-rose-500/50 text-rose-200 px-2 py-1 text-[11px]">
-                                <MinusCircle className="w-3.5 h-3.5" />
-                                {it.lastChange.delta}
+                              <span title="Pengurangan stok" className="inline-flex items-center gap-1 rounded-full bg-rose-900/60 border border-rose-500/50 text-rose-200 px-2 py-1 text-[11px] whitespace-nowrap overflow-hidden text-ellipsis max-w-full">
+                                <MinusCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                                <span className="truncate">{it.lastChange.delta}</span>
                               </span>
                             ) : null}
                           </div>
                         ) : null}
                         <div className="pointer-events-none absolute inset-0 ring-0 group-hover:ring-1 group-hover:ring-white/10" />
                       </div>
-                      <div className="mt-3 space-y-1 min-h-[4.25rem]">
-                        <div className="flex items-center justify-between gap-2 min-w-0">
+                      <div className="mt-3 space-y-1 min-h-[4.25rem] overflow-hidden">
+                        <div className="flex items-start justify-between gap-2 min-w-0">
                           <div
-                            className="flex-1 min-w-0 text-white/90 font-semibold whitespace-normal break-words leading-snug"
-                            style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+                            className="flex-1 min-w-0 text-white/90 font-semibold leading-snug text-sm"
+                            style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', wordBreak: 'break-word' }}
+                            title={it.name}
                           >
                             {it.name}
                           </div>
-                          <div className="shrink-0 flex items-center gap-2">
+                          <div className="shrink-0 flex items-center gap-1 max-w-[40%]">
                             {!!it.lastChange && typeof it.lastChange.delta === 'number' && it.lastChange.delta !== 0 ? (
                               it.lastChange.delta > 0 ? (
-                                <span title="Penambahan terbaru" className="inline-flex items-center gap-1 h-5 px-2 rounded-md bg-emerald-900/60 border border-emerald-500/50 text-emerald-200 text-[11px]">
-                                  <PlusCircle className="w-3.5 h-3.5" /> +{it.lastChange.delta}
+                                <span title="Penambahan terbaru" className="inline-flex items-center gap-1 h-5 px-1.5 rounded-md bg-emerald-900/60 border border-emerald-500/50 text-emerald-200 text-[10px] whitespace-nowrap overflow-hidden text-ellipsis max-w-full">
+                                  <PlusCircle className="w-3 h-3 flex-shrink-0" />
+                                  <span className="truncate">+{it.lastChange.delta}</span>
                                 </span>
                               ) : (
-                                <span title="Pengurangan terbaru" className="inline-flex items-center gap-1 h-5 px-2 rounded-md bg-rose-900/60 border border-rose-500/50 text-rose-200 text-[11px]">
-                                  <MinusCircle className="w-3.5 h-3.5" /> {it.lastChange.delta}
+                                <span title="Pengurangan terbaru" className="inline-flex items-center gap-1 h-5 px-1.5 rounded-md bg-rose-900/60 border border-rose-500/50 text-rose-200 text-[10px] whitespace-nowrap overflow-hidden text-ellipsis max-w-full">
+                                  <MinusCircle className="w-3 h-3 flex-shrink-0" />
+                                  <span className="truncate">{it.lastChange.delta}</span>
                                 </span>
                               )
                             ) : null}
                           </div>
                         </div>
-                        <div className="text-white/60 text-sm truncate">{it.description || '-'}</div>
+                        <div 
+                          className="text-white/60 text-xs leading-relaxed overflow-hidden"
+                          style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}
+                          title={it.description || '-'}
+                        >
+                          {it.description || '-'}
+                        </div>
                       </div>
                     </button>
                   ))}
