@@ -228,6 +228,45 @@ export default function MesinPage() {
     }
   };
 
+  // Helpers for rendering history with horizontal headers
+  const HorizontalHeader: React.FC<{ title: string; className?: string }> = ({ title, className = '' }) => (
+    <div className={className}>
+      <div className="flex items-center gap-3">
+        <div className="text-xs uppercase tracking-wider text-white/60 whitespace-nowrap">{title}</div>
+        <div className="h-px bg-white/10 flex-1" />
+      </div>
+    </div>
+  );
+
+  const renderHistoryCard = (it: HistoryItem) => (
+    <div key={`${it.jenis}-${it.id}`} className="rounded-xl border border-white/10 bg-white/5 p-3 flex items-start justify-between gap-3">
+      <div className="min-w-0">
+        <div className="text-sm font-semibold text-white/90 truncate">{it.namaMesin || '-'}</div>
+        <div className="text-xs text-white/60 truncate">{it.jenis === 'harian' ? 'Laporan Harian' : 'Laporan Kerusakan'} • {it.jenisMesin || '-'} • {it.imagesCount} foto</div>
+        <div className="text-[11px] text-white/40 mt-0.5 truncate">{formatDDMMMYYYYFromISO(it.createdAt)}</div>
+      </div>
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <button
+          type="button"
+          onClick={() => openDetail(it.jenis, it.id)}
+          className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/10 hover:bg-white/15 px-3 py-1.5 text-xs text-white"
+        >
+          <Eye className="w-4 h-4" /> Detail
+        </button>
+        <button
+          type="button"
+          onClick={() => confirmDelete(it.jenis, it.id)}
+          className="inline-flex items-center gap-1 rounded-lg border border-rose-900/50 bg-rose-900/30 hover:bg-rose-900/40 px-3 py-1.5 text-xs text-white"
+        >
+          <Trash2 className="w-4 h-4" /> Hapus
+        </button>
+      </div>
+    </div>
+  );
+
+  const harianGroup = historyItems.filter((i) => i.jenis === 'harian');
+  const kerusakanGroup = historyItems.filter((i) => i.jenis === 'kerusakan');
+
   // (URLs are revoked when each image is removed)
   return (
     <section className="w-full box-border flex flex-col flex-1 min-h-0 overflow-hidden">
@@ -451,32 +490,23 @@ export default function MesinPage() {
                     {!historyLoading && historyItems.length === 0 && (
                       <div className="text-center text-white/50 text-sm py-6">Belum ada laporan</div>
                     )}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {historyItems.map((it) => (
-                        <div key={`${it.jenis}-${it.id}`} className="rounded-xl border border-white/10 bg-white/5 p-3 flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <div className="text-sm font-semibold text-white/90 truncate">{it.namaMesin || '-'}</div>
-                            <div className="text-xs text-white/60 truncate">{it.jenis === 'harian' ? 'Laporan Harian' : 'Laporan Kerusakan'} • {it.jenisMesin || '-'} • {it.imagesCount} foto</div>
-                            <div className="text-[11px] text-white/40 mt-0.5 truncate">{formatDDMMMYYYYFromISO(it.createdAt)}</div>
+                    <div className="space-y-4">
+                      {harianGroup.length > 0 && (
+                        <>
+                          <HorizontalHeader title="Laporan Harian" />
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {harianGroup.map((it) => renderHistoryCard(it))}
                           </div>
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            <button
-                              type="button"
-                              onClick={() => openDetail(it.jenis, it.id)}
-                              className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/10 hover:bg-white/15 px-3 py-1.5 text-xs text-white"
-                            >
-                              <Eye className="w-4 h-4" /> Detail
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => confirmDelete(it.jenis, it.id)}
-                              className="inline-flex items-center gap-1 rounded-lg border border-rose-900/50 bg-rose-900/30 hover:bg-rose-900/40 px-3 py-1.5 text-xs text-white"
-                            >
-                              <Trash2 className="w-4 h-4" /> Hapus
-                            </button>
+                        </>
+                      )}
+                      {kerusakanGroup.length > 0 && (
+                        <>
+                          <HorizontalHeader title="Laporan Kerusakan" />
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {kerusakanGroup.map((it) => renderHistoryCard(it))}
                           </div>
-                        </div>
-                      ))}
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -676,32 +706,23 @@ export default function MesinPage() {
               {!historyLoading && historyItems.length === 0 && (
                 <div className="text-center text-white/50 text-sm py-6">Belum ada laporan</div>
               )}
-              <div className="grid grid-cols-2 gap-3">
-                {historyItems.map((it) => (
-                  <div key={`${it.jenis}-${it.id}`} className="rounded-xl border border-white/10 bg-white/5 p-3 flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="text-sm font-semibold text-white/90 truncate">{it.namaMesin || '-'}</div>
-                      <div className="text-xs text-white/60 truncate">{it.jenis === 'harian' ? 'Laporan Harian' : 'Laporan Kerusakan'} • {it.jenisMesin || '-'} • {it.imagesCount} foto</div>
-                      <div className="text-[11px] text-white/40 mt-0.5 truncate">{formatDDMMMYYYYFromISO(it.createdAt)}</div>
+              <div className="space-y-4">
+                {harianGroup.length > 0 && (
+                  <>
+                    <HorizontalHeader title="Laporan Harian" />
+                    <div className="grid grid-cols-2 gap-3">
+                      {harianGroup.map((it) => renderHistoryCard(it))}
                     </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => openDetail(it.jenis, it.id)}
-                        className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/10 hover:bg-white/15 px-3 py-1.5 text-xs text-white"
-                      >
-                        <Eye className="w-4 h-4" /> Detail
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => confirmDelete(it.jenis, it.id)}
-                        className="inline-flex items-center gap-1 rounded-lg border border-rose-900/50 bg-rose-900/30 hover:bg-rose-900/40 px-3 py-1.5 text-xs text-white"
-                      >
-                        <Trash2 className="w-4 h-4" /> Hapus
-                      </button>
+                  </>
+                )}
+                {kerusakanGroup.length > 0 && (
+                  <>
+                    <HorizontalHeader title="Laporan Kerusakan" />
+                    <div className="grid grid-cols-2 gap-3">
+                      {kerusakanGroup.map((it) => renderHistoryCard(it))}
                     </div>
-                  </div>
-                ))}
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -728,4 +749,3 @@ export default function MesinPage() {
     </section>
   );
 }
-
