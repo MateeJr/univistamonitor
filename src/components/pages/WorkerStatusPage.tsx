@@ -4,7 +4,7 @@ import { ENDPOINTS } from "@/components/config/server";
 import AddWorkerModal, { NewWorkerPayload } from "@/components/modals/AddWorkerModal";
 import WorkerDetailModal, { WorkerDetail } from "@/components/modals/WorkerDetailModal";
 import ConfirmDeleteModal from "@/components/modals/ConfirmDeleteModal";
-import { Eye, Trash2, Plus, Circle, Pencil, ListPlus } from "lucide-react";
+import { Eye, Trash2, Plus, Circle, Pencil, ListPlus, CheckCheck } from "lucide-react";
 import SelectModal from "@/components/modals/SelectModal";
 
 type WorkerListItem = {
@@ -57,6 +57,7 @@ export default function WorkerStatusPage() {
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [serverTimeIso, setServerTimeIso] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [bulkUpdating, setBulkUpdating] = useState(false);
   type StatusItem = { key: string; color: string };
   function defaultColorForKey(key?: string) {
     const k = String(key || '').toLowerCase();
@@ -266,6 +267,40 @@ export default function WorkerStatusPage() {
     }
   };
 
+  const setAllToTersedia = async () => {
+    if (bulkUpdating) return;
+    const total = items.length;
+    if (total === 0) return;
+    const ok = confirm(`Ubah semua (${total}) anggota menjadi TERSEDIA?`);
+    if (!ok) return;
+    setBulkUpdating(true);
+    try {
+      // Only update those not already 'tersedia' to save requests
+      const targets = items.filter((it) => (it.status || '').toLowerCase() !== 'tersedia');
+      // Fallback: if custom statuses not present, still send 'tersedia'
+      const doUpdate = async (id: string) => {
+        const res = await fetch(`${ENDPOINTS.workersDetailBase}/${id}/status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'tersedia' }),
+        });
+        // best-effort: ignore per-item failure, aggregate later
+        try { await res.json(); } catch {}
+      };
+      // limit concurrency to avoid hammering server
+      const concurrency = 6;
+      for (let i = 0; i < targets.length; i += concurrency) {
+        const batch = targets.slice(i, i + concurrency);
+        await Promise.all(batch.map((it) => doUpdate(it.id)));
+      }
+      await fetchList();
+    } catch (e) {
+      alert('Gagal mengubah semua status');
+    } finally {
+      setBulkUpdating(false);
+    }
+  };
+
   function statusKeyToLabel(v: string) {
     const k = v.toLowerCase();
     if (k === 'tersedia') return 'TERSEDIA';
@@ -371,6 +406,15 @@ export default function WorkerStatusPage() {
               title="Kelola status kustom"
             >
               <ListPlus className="w-4 h-4" /> Kelola Status
+            </button>
+            <button
+              type="button"
+              onClick={setAllToTersedia}
+              disabled={bulkUpdating}
+              className="inline-flex items-center gap-2 h-9 px-3 rounded-xl border border-emerald-700/50 bg-emerald-700/30 hover:bg-emerald-700/40 text-emerald-100 text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+              title="Ubah semua status anggota menjadi TERSEDIA"
+            >
+              <CheckCheck className="w-4 h-4" /> {bulkUpdating ? 'Memproses...' : 'TERSEDIA SEMUA'}
             </button>
           </div>
         </div>
