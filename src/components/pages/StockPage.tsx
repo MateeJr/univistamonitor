@@ -5,7 +5,7 @@ import AddSparepartModal, { NewSparepartPayload } from "@/components/modals/AddS
 import SparepartDetailModal, { SparepartDetail } from "@/components/modals/SparepartDetailModal";
 import ImagePreviewModal from "@/components/modals/ImagePreviewModal";
 import ConfirmDeleteProductModal from "@/components/modals/ConfirmDeleteProductModal";
-import { Plus, RefreshCw, PlusCircle, MinusCircle, FileDown } from "lucide-react";
+import { Plus, RefreshCw, PlusCircle, MinusCircle, FileDown, CheckCheck } from "lucide-react";
 
 type StockItem = {
   id: string;
@@ -41,6 +41,7 @@ export default function StockPage() {
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [showChangesOnly, setShowChangesOnly] = useState(false);
 
   const fetchList = async (isRefetch: boolean = false) => {
     try {
@@ -200,8 +201,23 @@ export default function StockPage() {
       };
       base = base.filter((it) => inFilter(Number(it.stock || 0)));
     }
+    if (showChangesOnly) {
+      base = base.filter((it) => {
+        const lc = it.lastChange as any;
+        if (!lc) return false;
+        // consider existence of any meaningful field (delta, at, by, reason, tujuan, from, to)
+        if (typeof lc.delta === 'number' && lc.delta !== 0) return true;
+        if (typeof lc.from === 'number' || typeof lc.to === 'number') return true;
+        if (typeof lc.at === 'string' && lc.at) return true;
+        if (typeof lc.by === 'string' && lc.by) return true;
+        if (typeof lc.reason === 'string' && lc.reason) return true;
+        if (typeof lc.tujuan === 'string' && lc.tujuan) return true;
+        // otherwise treat as no visible change
+        return false;
+      });
+    }
     return base;
-  }, [items, search, stockRangeFilter]);
+  }, [items, search, stockRangeFilter, showChangesOnly]);
 
   const summary = useMemo(() => {
     let totalProducts = items.length;
@@ -315,6 +331,18 @@ export default function StockPage() {
               className="inline-flex items-center gap-2 h-10 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-sm font-semibold"
             >
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} /> <span className="hidden xs:inline">{refreshing ? 'Refreshing' : 'Refresh'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowChangesOnly((v) => !v)}
+              className={`inline-flex items-center gap-2 h-10 px-3 rounded-xl text-sm font-semibold transition-all ${
+                showChangesOnly
+                  ? 'border border-emerald-600/60 bg-emerald-600/20 text-emerald-200 hover:bg-emerald-600/25'
+                  : 'bg-white/10 hover:bg-white/15 border border-white/10 text-white'
+              }`}
+              title="Tampilkan hanya item dengan perubahan/riwayat"
+            >
+              <CheckCheck className="w-4 h-4" /> <span className="hidden xs:inline">Tampilkan Perubahan</span>
             </button>
             <button
               type="button"
