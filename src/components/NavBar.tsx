@@ -1,16 +1,17 @@
 "use client";
 
-import { Home, Activity, User, Cpu, Package, Users, LucideIcon } from "lucide-react";
+import { Home, Activity, User, Cpu, Package, Users, Server, LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
-export type TabKey = "Home" | "Status" | "Mesin" | "Stock" | "WorkerStatus" | "Akun";
+export type TabKey = "Home" | "Status" | "Mesin" | "StatusMesin" | "Stock" | "WorkerStatus" | "Akun";
 
 const TABS: Array<{ key: TabKey; label: string; Icon: LucideIcon; href: string }> = [
   { key: "Home", label: "Home", Icon: Home, href: "/" },
   { key: "Status", label: "Status", Icon: Activity, href: "/status" },
   { key: "Mesin", label: "Mesin", Icon: Cpu, href: "/mesin" },
+  { key: "StatusMesin", label: "Status Mesin", Icon: Server, href: "/statusmesin" },
   { key: "Stock", label: "Stock", Icon: Package, href: "/stock" },
   { key: "WorkerStatus", label: "Anggota", Icon: Users, href: "/worker-status" },
   { key: "Akun", label: "Akun", Icon: User, href: "/akun" },
