@@ -5,7 +5,7 @@ import AddSparepartModal, { NewSparepartPayload } from "@/components/modals/AddS
 import SparepartDetailModal, { SparepartDetail } from "@/components/modals/SparepartDetailModal";
 import ImagePreviewModal from "@/components/modals/ImagePreviewModal";
 import ConfirmDeleteProductModal from "@/components/modals/ConfirmDeleteProductModal";
-import { Plus, RefreshCw, PlusCircle, MinusCircle, FileDown, CheckCheck } from "lucide-react";
+import { Plus, RefreshCw, PlusCircle, MinusCircle, FileDown, CheckCheck, ImageOff } from "lucide-react";
 
 type StockItem = {
   id: string;
@@ -197,6 +197,7 @@ export default function StockPage() {
         if (stockRangeFilter === '0 - 100') return s >= 0 && s <= 100;
         if (stockRangeFilter === '100 - 1000') return s > 100 && s <= 1000;
         if (stockRangeFilter === '1000 - 10000') return s > 1000 && s <= 10000;
+        if (stockRangeFilter === '10000 +') return s > 10000;
         return true;
       };
       base = base.filter((it) => inFilter(Number(it.stock || 0)));
@@ -226,6 +227,7 @@ export default function StockPage() {
       { label: '0 - 100', min: 0, max: 100, includeMin: true, includeMax: true, units: 0, products: 0 },
       { label: '100 - 1000', min: 100, max: 1000, includeMin: false, includeMax: true, units: 0, products: 0 },
       { label: '1000 - 10000', min: 1000, max: 10000, includeMin: false, includeMax: true, units: 0, products: 0 },
+      { label: '10000 +', min: 10000, max: Number.POSITIVE_INFINITY, includeMin: false, includeMax: true, units: 0, products: 0 },
     ];
     const inRange = (s: number, r: typeof ranges[number]) => {
       const geMin = r.includeMin ? s >= r.min : s > r.min;
@@ -351,7 +353,7 @@ export default function StockPage() {
               className="inline-flex items-center gap-2 h-10 px-3 rounded-xl bg-emerald-600/80 hover:bg-emerald-600 disabled:bg-gray-600/50 border border-emerald-500/50 disabled:border-gray-500/50 text-white text-sm font-semibold disabled:cursor-not-allowed transition-all"
             >
               <FileDown className="w-4 h-4" />
-              <span className="hidden xs:inline">{generatingPdf ? 'Generating...' : 'PDF Bulanan'}</span>
+              <span>{generatingPdf ? 'Membuat...' : 'Buat Laporan Bulanan'}</span>
             </button>
             <div className="hidden lg:flex items-center h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-xs text-white/70 whitespace-nowrap">
               Terakhir diupdate: <span className="ml-1 text-white/90">{lastUpdatedLabel}</span>
@@ -422,9 +424,13 @@ export default function StockPage() {
                             onClick={(e) => { e.stopPropagation(); setPreviewSrc(it.imageUrl!); setPreviewOpen(true); }}
                           />
                         ) : (
-                          <div className="w-full h-full flex flex-col items-center justify-center text-white/40 text-xs">
-                            <div className="h-10 w-10 rounded-md border border-white/10 bg-white/10 mb-2" />
-                            Tidak ada gambar
+                          <div className="w-full h-full relative flex items-center justify-center">
+                            <div className="relative z-10 flex flex-col items-center text-white/70">
+                              <div className="h-16 w-20 rounded-md border-2 border-dashed border-white/25 bg-white/[0.03] flex items-center justify-center">
+                                <ImageOff className="w-8 h-8 text-white/45" aria-hidden />
+                              </div>
+                              <div className="mt-2 text-[12px] text-white/60 select-none">Tidak ada gambar</div>
+                            </div>
                           </div>
                         )}
                         {/* Stock badge pinned to top-left of the frame */}
@@ -475,12 +481,14 @@ export default function StockPage() {
                             ) : null}
                           </div>
                         </div>
-                        <div 
-                          className="text-white/60 text-xs leading-relaxed overflow-hidden"
+                        <div
+                          className="text-white/90 text-xs leading-relaxed overflow-hidden"
                           style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}
                           title={it.description || '-'}
                         >
-                          {it.description || '-'}
+                          <span className="bg-black/60 box-decoration-clone rounded px-1 py-0.5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]">
+                            {it.description || '-'}
+                          </span>
                         </div>
                       </div>
                     </button>

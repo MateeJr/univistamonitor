@@ -67,6 +67,8 @@ export default function SparepartDetailModal({
   const [history, setHistory] = useState<StockChangeEntry[]>(Array.isArray(data.history) ? data.history : []);
   const [tujuan, setTujuan] = useState<string>("");
   const [userName, setUserName] = useState<string>("");
+  const [imageLoading, setImageLoading] = useState<boolean>(false);
+  const [historyLoading, setHistoryLoading] = useState<boolean>(false);
 
   useEffect(() => {
     setName(data.name || "");
@@ -78,6 +80,7 @@ export default function SparepartDetailModal({
     // Try load full history detail from server
     (async () => {
       try {
+        setHistoryLoading(true);
         const res = await fetch(`${ENDPOINTS.stockDetailBase}/${data.id}`, { cache: "no-store" });
         if (res.ok) {
           const j = await res.json().catch(() => ({} as any));
@@ -85,6 +88,7 @@ export default function SparepartDetailModal({
           if (Array.isArray(h)) setHistory(h);
         }
       } catch {}
+      finally { setHistoryLoading(false); }
     })();
     // Get current user name from local storage (@akun/profile)
     try {
@@ -96,6 +100,12 @@ export default function SparepartDetailModal({
       }
     } catch {}
   }, [data]);
+
+  // Track image loading state whenever source changes
+  useEffect(() => {
+    const hasImg = !!(imageDataUrl || (data.imageUrl && !removeImage));
+    setImageLoading(hasImg);
+  }, [imageDataUrl, data.imageUrl, removeImage]);
 
   const handleFile = (file?: File | null) => {
     if (!file) return setImageDataUrl(null);
@@ -124,7 +134,13 @@ export default function SparepartDetailModal({
   return (
     <div role="dialog" aria-modal="true" className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" onClick={onClose} aria-hidden />
-      <div className="relative w-full max-w-4xl rounded-2xl border border-white/10 bg-[#0b0b0b] p-5 shadow-[0_12px_32px_rgba(0,0,0,0.6)] max-h-[85vh] overflow-hidden">
+      {/*
+        Use viewport-relative sizing and allow overflow scrolling so the
+        modal content scales properly on browser zoom and small screens.
+        Avoid fixed pixel tracks that can visually "freeze" content while
+        only the backdrop resizes.
+      */}
+      <div className="relative w-full max-w-[min(96vw,64rem)] rounded-2xl border border-white/10 bg-[#0b0b0b] p-5 shadow-[0_12px_32px_rgba(0,0,0,0.6)] max-h-[85dvh] overflow-auto uv-scrollbar">
         <button
           type="button"
           onClick={onClose}
@@ -134,14 +150,38 @@ export default function SparepartDetailModal({
           <X className="h-4 w-4" />
         </button>
 
-        <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-[280px_1fr_320px] gap-4 md:h-[70vh] min-h-0">
-          <div className="rounded-xl border border-white/10 bg-white/5 overflow-hidden p-3 flex flex-col items-center justify-center">
-            {imageDataUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={imageDataUrl} alt={name} className="w-full aspect-square object-cover rounded-lg border border-white/10" />
-            ) : data.imageUrl && !removeImage ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={data.imageUrl} alt={name} className="w-full aspect-square object-cover rounded-lg border border-white/10 cursor-zoom-in" onClick={(e) => { e.stopPropagation(); window.open(data.imageUrl!, '_blank'); }} />
+        {/*
+          Switch to responsive column widths using clamp() so the side
+          panels resize with viewport changes/zoom. Remove fixed container
+          height; the outer panel now manages scrolling.
+        */}
+        <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-[clamp(14rem,28vw,18rem)_1fr_clamp(15rem,30vw,20rem)] gap-4 min-h-0">
+          <div className="rounded-xl border border-white/10 bg-white/5 overflow-hidden p-3 flex flex-col items-center justify-center" aria-busy={imageLoading}>
+            {(imageDataUrl || (data.imageUrl && !removeImage)) ? (
+              <div className="relative w-full">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={imageDataUrl || (data.imageUrl as string)}
+                  alt={name}
+                  className={`w-full aspect-square object-cover rounded-lg border border-white/10 transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                  onLoad={() => setImageLoading(false)}
+                  onError={() => setImageLoading(false)}
+                  onClick={(e) => {
+                    if (!imageDataUrl && data.imageUrl) {
+                      e.stopPropagation();
+                      window.open(data.imageUrl, '_blank');
+                    }
+                  }}
+                />
+                {imageLoading && (
+                  <>
+                    <div className="absolute inset-0 rounded-lg bg-white/5 animate-pulse" aria-hidden />
+                    <div className="absolute inset-0 flex items-center justify-center" aria-hidden>
+                      <div className="h-7 w-7 rounded-full border-2 border-white/25 border-t-white/70 animate-spin" />
+                    </div>
+                  </>
+                )}
+              </div>
             ) : (
               <div className="aspect-square w-full min-h-[240px] flex items-center justify-center text-white/40 text-sm">Tidak ada gambar</div>
             )}
@@ -207,9 +247,27 @@ export default function SparepartDetailModal({
 
           {/* Right history panel */}
           <aside className="md:pl-1 min-h-0">
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 h-full overflow-y-auto uv-scrollbar">
-              <div className="text-sm font-medium text-white/80 mb-3">Riwayat Perubahan</div>
-              {history && history.length ? (
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 md:max-h-[60dvh] overflow-y-auto uv-scrollbar" aria-busy={historyLoading}>
+              <div className="text-sm font-medium text-white/80 mb-3 flex items-center gap-2">
+                <span>Riwayat Perubahan</span>
+                {historyLoading && (
+                  <span className="inline-block h-3 w-3 rounded-full border-2 border-white/25 border-t-white/70 animate-spin" aria-label="Loading" />
+                )}
+              </div>
+              {historyLoading && (!history || history.length === 0) ? (
+                <div className="space-y-2">
+                  {Array.from({ length: 4 }).map((_, idx) => (
+                    <div key={idx} className="p-2.5 rounded-lg border border-white/10 bg-black/30 animate-pulse">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="h-5 w-20 rounded-full bg-white/10" />
+                        <div className="h-3 w-24 rounded bg-white/10" />
+                      </div>
+                      <div className="mt-2 h-3 w-3/4 rounded bg-white/10" />
+                      <div className="mt-2 h-3 w-1/3 rounded bg-white/10" />
+                    </div>
+                  ))}
+                </div>
+              ) : history && history.length ? (
                 <div className="space-y-2">
                   {history.slice().reverse().map((h, idx) => {
                     const isUp = typeof h.delta === 'number' ? h.delta > 0 : (h.reason || '').toLowerCase().includes('tambah');
@@ -254,5 +312,3 @@ export default function SparepartDetailModal({
     </div>
   );
 }
-
-
