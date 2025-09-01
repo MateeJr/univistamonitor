@@ -52,4 +52,10 @@ export const ENDPOINTS = {
   stockCreate: `${PUBLIC_BASE}/api/stock`, // POST
   stockDetailBase: `${PUBLIC_BASE}/api/stock`, // use: `${stockDetailBase}/${id}` (GET)
   stockFilesBase: `${PUBLIC_BASE}/files/stock`,
+  // machines endpoints
+  machinesList: `${PUBLIC_BASE}/api/machines`, // GET
+  machinesCreate: `${PUBLIC_BASE}/api/machines`, // POST
+  machinesDetailBase: `${PUBLIC_BASE}/api/machines`, // use: `${machinesDetailBase}/${id}`
+  machinesStatusList: `${PUBLIC_BASE}/api/machines/statuslist`, // GET/POST/DELETE/PATCH
+  machinesFilesBase: `${PUBLIC_BASE}/files/machines`,
 };

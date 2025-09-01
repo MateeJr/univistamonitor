@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { AlertTriangle, X, Trash2 } from "lucide-react";
 
@@ -59,5 +60,4 @@ export default function ConfirmDeleteModal({
     </div>
   );
 }
-
 
