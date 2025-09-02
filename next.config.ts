@@ -1,8 +1,18 @@
 import type { NextConfig } from "next";
 
 // Read backend target from env. Defaults match src/components/config/server.ts
-const SERVER_HOST = process.env.NEXT_PUBLIC_SERVER_HOST || "145.239.65.119";
-const SERVER_PORT = process.env.NEXT_PUBLIC_SERVER_PORT || "20070";
+const RAW_HOST = process.env.NEXT_PUBLIC_SERVER_HOST || "145.239.65.119";
+const RAW_PORT = process.env.NEXT_PUBLIC_SERVER_PORT || "20070";
+
+// Be defensive about misconfigured envs in Vercel (e.g. values that include scheme or quotes)
+const sanitizeHost = (h: string) => String(h).replace(/^https?:\/\//, "").replace(/\s+/g, "").replace(/\/+$/, "");
+const sanitizePort = (p: string) => {
+  const m = String(p).match(/\d{2,5}/);
+  return m ? m[0] : "20070";
+};
+
+const SERVER_HOST = sanitizeHost(RAW_HOST);
+const SERVER_PORT = sanitizePort(RAW_PORT);
 const TARGET = `http://${SERVER_HOST}:${SERVER_PORT}`;
 
 const nextConfig: NextConfig = {
@@ -22,12 +32,17 @@ const nextConfig: NextConfig = {
       { source: "/health", destination: `${TARGET}/health` },
 
       // specific backend namespaces under /api (avoid catching /api/accounts/* which is handled by Next API routes)
+      // Explicit base endpoints
+      { source: "/api/machines", destination: `${TARGET}/api/machines` },
+      { source: "/api/workers", destination: `${TARGET}/api/workers` },
+      { source: "/api/stock", destination: `${TARGET}/api/stock` },
       { source: "/api/time", destination: `${TARGET}/api/time` },
       { source: "/api/system/:path*", destination: `${TARGET}/api/system/:path*` },
       { source: "/api/network/:path*", destination: `${TARGET}/api/network/:path*` },
       { source: "/api/laporan/:path*", destination: `${TARGET}/api/laporan/:path*` },
       { source: "/api/workers/:path*", destination: `${TARGET}/api/workers/:path*` },
       { source: "/api/stock/:path*", destination: `${TARGET}/api/stock/:path*` },
+      { source: "/api/machines/:path*", destination: `${TARGET}/api/machines/:path*` },
 
       // frontend-scoped auth/api used by the app
       { source: "/frontend/:path*", destination: `${TARGET}/frontend/:path*` },
