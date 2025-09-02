@@ -4,7 +4,7 @@ export default function NotFound() {
   return (
     <main className="px-6 overflow-hidden">
       <section className="mx-auto max-w-4xl">
-        <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[calc(100dvh-80px)] md:h-[100dvh]">
+        <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[calc(100dvh-80px)] md:h-[calc(100dvh-1px)]">
           {/* Colorful soft glows */}
           <div
             aria-hidden
