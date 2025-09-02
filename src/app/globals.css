@@ -68,3 +68,17 @@ html { color-scheme: dark; background-color: #0a0a0a !important; }
 .uv-scrollbar::-webkit-scrollbar-corner {
   background: transparent;
 }
+
+/* Subtle entrance + float animations for UI polish */
+@keyframes uv-fade-in-up {
+  0% { opacity: 0; transform: translateY(10px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes uv-float-slow {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-8px) scale(1.02); }
+}
+.uv-animate-in { animation: uv-fade-in-up 650ms ease-out both; }
+.uv-animate-in-2 { animation: uv-fade-in-up 750ms ease-out both; }
+.uv-animate-in-3 { animation: uv-fade-in-up 850ms ease-out both; }
+.uv-float-slow { animation: uv-float-slow 8s ease-in-out infinite; }
