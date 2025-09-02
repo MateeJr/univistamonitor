@@ -2,9 +2,9 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <main className="p-6">
+    <main className="px-6 overflow-hidden">
       <section className="mx-auto max-w-4xl">
-        <div className="relative flex min-h-[65vh] flex-col items-center justify-center text-center">
+        <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[calc(100dvh-80px)] md:h-[100dvh]">
           {/* Colorful soft glows */}
           <div
             aria-hidden
